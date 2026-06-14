@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make *)",
+      "Bash(scripts/git/*.sh *)",
+      "Bash(scripts/github/*.sh *)",
+      "Bash(scripts/coverage/*.sh *)",
+      "Bash(scripts/contract-check.sh *)",
+      "Bash(scripts/verify-production.sh *)",
+      "Bash(git submodule *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git add *)",
+      "Bash(gh pr *)",
+      "Bash(gh issue *)",
+      "Bash(gh repo *)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm run *)",
+      "Bash(mvn *)",
+      "Bash(go test*)",
+      "Bash(go build*)",
+      "Bash(node scripts/*.mjs *)"
+    ],
+    "deny": [
+      "Bash(git push * master*)",
+      "Bash(git push * main*)",
+      "Bash(rm -rf packages/*)"
+    ]
+  }
+}

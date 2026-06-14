@@ -1,0 +1,58 @@
+# ---- Dependencies ----
+node_modules/
+.pnpm-store/
+
+# ---- Build outputs ----
+dist/
+build/
+target/
+out/
+*.tsbuildinfo
+.next/
+.nuxt/
+.output/
+.vercel/
+
+# ---- Go ----
+*.exe
+*.exe~
+*.test
+*.out
+vendor/
+
+# ---- Test / coverage ----
+coverage/
+# 保留覆盖率收集脚本源码（scripts/coverage/ 是工具脚本，非输出）
+!scripts/coverage/
+!scripts/coverage/**
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+*.lcov
+
+# ---- Env & secrets ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ---- Claude / agent local ----
+.claude/settings.local.json
+.claude/projects/
+.claude/memory/*.jsonl
+.worktrees/
+.cursor/state/
+.kd-review/
+.luban-review/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs ----
+*.log
+logs/
