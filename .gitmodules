@@ -1,0 +1,28 @@
+[submodule "packages/engine/luban"]
+	path = packages/engine/luban
+	url = https://github.com/xiaoshuai1024/luban.git
+	branch = master
+[submodule "packages/bff/luban-bff"]
+	path = packages/bff/luban-bff
+	url = https://github.com/xiaoshuai1024/luban-bff.git
+	branch = master
+[submodule "packages/ui/luban-ui"]
+	path = packages/ui/luban-ui
+	url = https://github.com/xiaoshuai1024/luban-ui.git
+	branch = master
+[submodule "packages/web/luban-website"]
+	path = packages/web/luban-website
+	url = https://github.com/xiaoshuai1024/luban-website.git
+	branch = master
+[submodule "packages/backend/luban-backend"]
+	path = packages/backend/luban-backend
+	url = https://github.com/xiaoshuai1024/luban-backend.git
+	branch = master
+[submodule "packages/backend/luban-backend-go"]
+	path = packages/backend/luban-backend-go
+	url = https://github.com/xiaoshuai1024/luban-backend-go.git
+	branch = master
+[submodule "packages/docs/luban-architecture-design"]
+	path = packages/docs/luban-architecture-design
+	url = https://github.com/xiaoshuai1024/luban-architecture-design.git
+	branch = main
