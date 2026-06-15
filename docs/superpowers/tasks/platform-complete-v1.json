@@ -89,7 +89,7 @@
       "dependsOn": [
         "T-be-4"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-be-9",
@@ -102,7 +102,7 @@
         "T-be-4",
         "T-be-6"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-1",
@@ -346,7 +346,7 @@
       "dependsOn": [
         "T-ui-4"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-eng-10",
