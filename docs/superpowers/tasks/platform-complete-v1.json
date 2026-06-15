@@ -38,7 +38,7 @@
       "dependsOn": [
         "T-be-2"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-be-4",
@@ -49,7 +49,7 @@
       "dependsOn": [
         "T-be-2"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-be-5",
@@ -60,7 +60,7 @@
       "dependsOn": [
         "T-be-2"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-be-6",
@@ -78,7 +78,7 @@
       "wave": 2,
       "title": "FeatureGate 配置实体 + FeatureGateService（开关读取）+ lead_capture/collab 关联",
       "dependsOn": [],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-be-8",
@@ -167,7 +167,7 @@
       "dependsOn": [
         "T-ui-4"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-8",
@@ -178,7 +178,7 @@
       "dependsOn": [
         "T-ui-4"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-9",
@@ -190,7 +190,7 @@
         "T-ui-4",
         "T-ui-5"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-10",
@@ -201,7 +201,7 @@
       "dependsOn": [
         "T-ui-4"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-11",
@@ -213,7 +213,7 @@
         "T-ui-4",
         "T-ui-5"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-12",
@@ -228,7 +228,7 @@
         "T-ui-10",
         "T-ui-11"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-ui-13",
@@ -239,7 +239,7 @@
       "dependsOn": [
         "T-ui-12"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-eng-1",
@@ -400,7 +400,7 @@
       "dependsOn": [
         "T-be-6"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-bff-4",
