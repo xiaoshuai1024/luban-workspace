@@ -496,7 +496,7 @@
       "dependsOn": [
         "T-be-7"
       ],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "T-cross-3",
