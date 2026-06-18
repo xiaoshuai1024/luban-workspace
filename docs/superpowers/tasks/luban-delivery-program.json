@@ -1,0 +1,72 @@
+{
+  "featureId": "luban-delivery-program",
+  "title": "Luban 可交付治理项目集",
+  "type": "program",
+  "createdAt": "2026-06-14",
+  "status": "planning",
+  "branchStrategy": "各子仓 feature/luban-delivery-<wave> 同名分支",
+  "gateTargets": {
+    "engine": 0.85,
+    "bff": 0.85,
+    "website": 0.85,
+    "ui": 0.90,
+    "java": 0.80,
+    "go": 0.75
+  },
+  "children": [
+    {
+      "id": "T1",
+      "title": "物料 schema 重构",
+      "wave": 0,
+      "group": "ui",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-14-t1-material-schema-refactor.md",
+      "gate": "物料单测覆盖率 90% + props schema 合规校验通过"
+    },
+    {
+      "id": "T2",
+      "title": "后端基础设施（Flyway + 双后端全量一致 + Contract Test）",
+      "wave": 0,
+      "group": "backend",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-14-t2-backend-infra.md",
+      "gate": "Java mvn verify 绿 / Go go test 绿 / Contract Test 双端字段一致"
+    },
+    {
+      "id": "T3",
+      "title": "治理文档（PLAN_WRITING_CONTRACT + FEATURES + INIT-PLAN + 架构文档子仓 + 设计 token）",
+      "wave": 0,
+      "group": "docs",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-14-t3-governance-docs.md",
+      "gate": "死链清零 + 文档 lint 通过"
+    },
+    {
+      "id": "T4",
+      "title": "编辑器闭环（核心交付）",
+      "wave": 1,
+      "group": "engine",
+      "dependsOn": ["T1", "T2"],
+      "planFile": ".agents/plans/2026-06-14-t4-editor-closed-loop.md",
+      "gate": "主链路 E2E（Playwright 绑正式路由）绿"
+    },
+    {
+      "id": "T5",
+      "title": "测试门禁达标（五端覆盖率 + Cypress→Playwright 统一）",
+      "wave": 2,
+      "group": "test",
+      "dependsOn": ["T4", "T1", "T2"],
+      "planFile": ".agents/plans/2026-06-14-t5-test-coverage-gates.md",
+      "gate": "全栈覆盖率汇总达标（make test-coverage）"
+    },
+    {
+      "id": "T6",
+      "title": "客户端骨架（electron/flutter/cross-plateform + 多端技术验证）",
+      "wave": 3,
+      "group": "client",
+      "dependsOn": ["T4"],
+      "planFile": ".agents/plans/2026-06-14-t6-client-scaffolding.md",
+      "gate": "各端冒烟渲染一致（引擎产物三端可见）"
+    }
+  ]
+}
