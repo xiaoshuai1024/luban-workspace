@@ -6,16 +6,34 @@
 
 ## 1. E2E 类型与所属目录
 
-| 类型 | 目录 / 入口 | 典型命令 |
-|------|----------------|----------|
-| **引擎渲染 E2E** | `packages/engine/luban/tests/e2e/` | `cd packages/engine/luban && pnpm run test:e2e` |
-| **website SSR E2E** | `packages/web/luban-website/tests/e2e/` | `cd packages/web/luban-website && pnpm run test:e2e` |
-| **UI 物料 E2E** | `packages/ui/luban-ui/tests/e2e/` | `cd packages/ui/luban-ui && pnpm run test:e2e` |
-| **client Electron E2E** | `packages/client/luban-electron/tests/e2e/` | `cd packages/client/luban-electron && pnpm run test:e2e` |
-| **client Flutter WebView E2E** | `packages/client/luban-flutter/e2e/` | `cd packages/client/luban-flutter && flutter test e2e/` |
-| **BFF 集成 E2E** | `packages/bff/luban-bff/tests/e2e/` | `cd packages/bff/luban-bff && pnpm run test:e2e` |
-| **后端 Java 集成测** | `packages/backend/luban-backend/src/test/java/**/*IT.java` | `cd packages/backend/luban-backend && mvn -q verify` |
-| **后端 Go 集成测** | `packages/backend/luban-backend-go/**/*_test.go` | `cd packages/backend/luban-backend-go && go test ./...` |
+> ⚠️ **现状 vs 目标态（2026-06-19 校准）**：下表「现状」为实测，「目标」为 `luban-e2e-strategy` plan 落地后口径。**全栈统一 Playwright**（见 `luban-e2e-strategy` plan）。迁移未完成的项以「现状」列命令为准。
+
+| 类型 | 现状（实测） | 目标态（plan 落地后） | 典型命令 |
+|------|----------------|----------------|----------|
+| **引擎渲染 E2E** | ⚠️ Cypress `packages/engine/luban/cypress/e2e/*.cy.ts`（含 mock-token 假绿，见 §1.3） | Playwright `packages/engine/luban/e2e/*.spec.ts`（去假绿，真实登录） | 现状：`cd packages/engine/luban && pnpm run e2e` ；目标：`pnpm run test:e2e` |
+| **website SSR E2E** | 🔴 **无**（零测试） | Playwright `packages/web/luban-website/e2e/` | 目标：`cd packages/web/luban-website && pnpm run install:e2e && pnpm run test:e2e` |
+| **UI 物料 E2E** | ⚠️ nx+Cypress `packages/ui/luban-ui/apps/luban-ui-e2e/`（仅骨架）；`packages/luban-{base,low-code}/test/e2e/*.e2e.spec.ts` 实为 vitest jsdom 组件测 | Playwright（正名组件测为 `test/component/`） | 现状：`cd packages/ui/luban-ui && pnpm run test:e2e` |
+| **client Electron/Flutter E2E** | 🔴 **子项目不存在**（空目录，非 submodule） | 待 client 子项目落地后另立 plan | — |
+| **BFF E2E** | 🔴 无 e2e（仅 Vitest unit）；契约由跨项目流程间接覆盖 | 不建独立浏览器 e2e | `cd packages/bff/luban-bff && pnpm run test`（unit） |
+| **后端 Java 集成测** | JUnit+H2 `src/test/java/**/{*Test,*IT}.java` | 同现状 | `cd packages/backend/luban-backend && mvn -q verify` |
+| **后端 Go 测试** | go test `**/*_test.go`（全单测） | 同现状 | `cd packages/backend/luban-backend-go && go test ./...` |
+| **跨项目流程性 E2E（主项目）** | 🔴 无 | Playwright `e2e/`（workspace 根，独立 npm 包） | `make e2e-cross`（见 §1.4） |
+
+### 1.3 engine 现有 Cypress 假绿警告（MUST 知晓）
+
+`packages/engine/luban/cypress/support/commands.ts` 的 `loginWithToken` 注入 `MOCK_TOKEN='mock-jwt-token'` 到 localStorage，**绕过真实后端登录**。后果：leads/sites/pages 等 spec 在后端 Controller 不存在时仍全绿。此为 `luban-e2e-execution-contract §2.5.1` 明令禁止的假绿，将在 `luban-e2e-strategy` plan W3-T1 迁移 Playwright 时强制移除。**迁移完成前，不得把 engine Cypress 结果当作后端已验收的证据。**
+
+### 1.4 跨项目流程性 E2E（主项目，新增）
+
+`luban-e2e-strategy` plan 在 workspace 根新建 `e2e/`（Playwright 多 project），编排 engine→BFF→backend→website 全链路：
+
+| 流程 | spec | 覆盖链路 |
+|------|------|---------|
+| 发布闭环 | `e2e/flows/publish-flow.spec.ts` | 登录→建站点→建页面→发布→website SSR 断言 |
+| 线索闭环 | `e2e/flows/lead-capture-flow.spec.ts` | website 表单→backend 入库→engine 线索中心可见 |
+| 双后端一致性 | `e2e/contract/dual-backend.spec.ts` | 同请求打 Java/Go 等价断言 |
+
+命令：`make e2e-up`（起服务）→ `make e2e-cross`（跑跨项目流程）→ `make e2e-down`。
 
 ### 1.1 引擎渲染 E2E：须走正式调试页 / 真实渲染路径（MUST）
 
@@ -101,6 +119,8 @@
 ---
 
 ## 4. 引擎渲染 Playwright（`packages/engine/luban`）
+
+> ⚠️ **现状（2026-06-19）**：engine 当前仍用 Cypress（见 §1.3 假绿警告）。本节为 Playwright **目标态**口径，对应 `luban-e2e-strategy` plan W3-T1 迁移完成后生效。迁移前 engine 命令以 `cd packages/engine/luban && pnpm run e2e`（Cypress）为准。
 
 ### 4.0 浏览器约定（MUST）
 

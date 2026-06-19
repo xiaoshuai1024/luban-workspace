@@ -1,0 +1,133 @@
+{
+  "featureId": "luban-e2e-strategy",
+  "title": "Luban E2E 测试体系：各端自洽 Playwright + 主项目跨项目流程性 E2E",
+  "type": "plan",
+  "createdAt": "2026-06-19",
+  "status": "approved",
+  "branchStrategy": "workspace feature/luban-e2e-strategy；engine feature/luban-e2e-migration；website feature/add-e2e；ui feature/luban-e2e-migration",
+  "framework": "Playwright (全栈统一)",
+  "gateTargets": {
+    "realness": "engine 任意 e2e 在 backend 停服时必须红（证非假绿）",
+    "crossFlow": "发布闭环/线索闭环/双后端一致性三条均绿，且断一环则红",
+    "perSystem": "engine/website/ui 各自 pnpm run test:e2e 独立绿；website 不再零测试",
+    "ci": "PR 自动跑各子仓 + workspace 跨项目 e2e 并必过",
+    "docConsistency": "E2E_AGENT_GUIDE.md 目录/命令与实现 1:1 无幻觉"
+  },
+  "defaults": {
+    "firstDelivery": "W1 (主项目骨架 + 发布闭环)",
+    "authAccount": "后端预置专用 e2e 账号，env 注入 LUBAN_E2E_ACCOUNT/LUBAN_E2E_PASSWORD",
+    "dualBackend": "Java(8080) + Go 同时在线做等价断言",
+    "serviceBootstrap": "docker-compose.e2e.yml (干净隔离)",
+    "engineMigrationTiming": "串行 W1→W2→W3 (避免同时改 engine 两套)"
+  },
+  "children": [
+    {
+      "id": "W0-T1",
+      "title": "修订 docs/E2E_AGENT_GUIDE.md：删除不存在的目录/命令，加现状vs目标态对照表，标注 Playwright 统一口径与迁移说明",
+      "wave": 0,
+      "group": "docs",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "文档不再有幻觉目录（engine cypress→e2e、website/ui/bff 不存在的 tests/e2e/ 全删）；§2.5 引用仍有效；加现状vs目标态表"
+    },
+    {
+      "id": "W1-T1",
+      "title": "新建 workspace 根 e2e/：package.json(pnpm) + playwright.config.ts(多 project) + auth.setup.ts(真实登录 env 注入) + tsconfig + .env.example",
+      "wave": 1,
+      "group": "workspace",
+      "dependsOn": ["W0-T1"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "pnpm i && pnpm exec playwright install chrome 成功；空 spec 跑通；auth.setup 拿到 storageState 且 origin 与 baseURL 一致"
+    },
+    {
+      "id": "W1-T2",
+      "title": "跨项目起服务编排：docker-compose.e2e.yml(backend Java+Go + bff + engine + website 端口固定) + scripts/e2e/up-all.sh + Makefile 加 e2e-up/e2e-down/e2e/e2e-cross target",
+      "wave": 1,
+      "group": "workspace",
+      "dependsOn": ["W1-T1"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "make e2e-up 起齐 5 服务健康检查绿；make e2e-down 干净退出无残留进程"
+    },
+    {
+      "id": "W1-T3",
+      "title": "流程A 发布闭环 e2e/flows/publish-flow.spec.ts(真实登录→建站点→建页面→发布→website SSR 断言) + 补 scripts/e2e/engine-render-preflight.sh 为真实预检",
+      "wave": 1,
+      "group": "workspace",
+      "dependsOn": ["W1-T2"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "pnpm test:e2e --project=engine 流程A 绿；停 backend 时红(证非假绿)；preflight 脚本 build 零 console error + schema 合规"
+    },
+    {
+      "id": "W1-T4",
+      "title": "流程C 双后端一致性 e2e/contract/dual-backend.spec.ts(同 BFF 请求打 Java/Go 等价断言 datasource/leads/pages)",
+      "wave": 1,
+      "group": "workspace",
+      "dependsOn": ["W1-T2"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "双端均在线时绿；单端断言差异红(防 drift)；对齐 docs/DUAL_BACKEND_PARITY.md 契约"
+    },
+    {
+      "id": "W2-T1",
+      "title": "packages/web/luban-website 加 Playwright：playwright.config.ts(webServer 自动起 dev) + auth.setup + .env.example + package.json test:e2e 脚本",
+      "wave": 2,
+      "group": "website",
+      "dependsOn": ["W0-T1"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "pnpm run install:e2e && pnpm run test:e2e 骨架跑通；webServer 自动起 nuxt dev"
+    },
+    {
+      "id": "W2-T2",
+      "title": "website e2e：SSR 注入(__INITIAL_STATE__) + SEO meta(title/og) + hydration 无 mismatch + 公开页渲染",
+      "wave": 2,
+      "group": "website",
+      "dependsOn": ["W2-T1"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "公开页 spec 绿；关 SSR 渲染断言红（证确实验证 SSR）"
+    },
+    {
+      "id": "W2-T3",
+      "title": "流程B 线索闭环 e2e/flows/lead-capture-flow.spec.ts(website 提交→engine 线索中心可见，字段/脱敏 138****8000 断言)",
+      "wave": 2,
+      "group": "workspace",
+      "dependsOn": ["W1-T3", "W2-T2"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "全链路绿；DB 无对应记录时红；去重/加密正确；手机号脱敏"
+    },
+    {
+      "id": "W3-T1",
+      "title": "engine cypress/e2e/ → e2e/(Playwright) 迁移：login/navigation/sites/pages/leads 5 文件平移；去 mock-token 改 auth.setup 真实登录；删 cypress 依赖与 cypress.config.ts",
+      "wave": 3,
+      "group": "engine",
+      "dependsOn": ["W0-T1", "W1-T1"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "Playwright 等价用例绿；停 backend 时 leads/sites 红(证非假绿)；cypress 依赖/config 全部移除"
+    },
+    {
+      "id": "W3-T2",
+      "title": "ui apps/luban-ui-e2e nx-cypress → Playwright；补物料渲染 e2e(挂载+props透传+事件回调)；luban-base/low-code 的 .e2e.spec.ts 正名为 component 测",
+      "wave": 3,
+      "group": "ui",
+      "dependsOn": ["W0-T1"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "designer 骨架 + 物料渲染 spec 绿；伪 e2e 正名为 component（消除命名误导）；对齐 luban-low-code 物料清单"
+    },
+    {
+      "id": "W4-T1",
+      "title": "各子仓 .github/workflows/test.yml：engine/website/ui 跑各自 Playwright；backend 跑 mvn verify / go test",
+      "wave": 4,
+      "group": "ci",
+      "dependsOn": ["W3-T1", "W2-T1", "W3-T2"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "PR 触发 workflow 绿；各子仓独立可跑"
+    },
+    {
+      "id": "W4-T2",
+      "title": "workspace 根 .github/workflows/e2e-cross.yml：起服务编排→跑 e2e/flows/*(流程A/B/C)，设为 PR 必过检查",
+      "wave": 4,
+      "group": "ci",
+      "dependsOn": ["W1-T3", "W1-T4", "W2-T3"],
+      "planFile": ".agents/plans/2026-06-19-luban-e2e-strategy.md",
+      "gate": "PR 触发跨项目 e2e 绿；失败阻断合入；服务编排可重复无状态残留"
+    }
+  ]
+}

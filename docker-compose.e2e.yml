@@ -1,0 +1,118 @@
+# Luban 跨项目 E2E 服务编排
+#
+# 一键起齐：MySQL + Redis + Java backend + Go backend + BFF + engine + website
+# 用法：make e2e-up / make e2e-down
+#
+# 端口约定（与 e2e/.env.example 对齐）：
+#   MySQL     3307（避免与本地 3306 冲突）
+#   Redis     6380（避免与本地 6379 冲突）
+#   Java      8080  context-path /backend
+#   Go        8081  根路径（双后端差异：无 context-path）
+#   BFF       3100
+#   engine    4200  (vite.config.ts 固定)
+#   website   3000
+#
+# 双后端均连同一 MySQL/Redis，数据共享；契约测试比对两端口响应等价性。
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: luban
+      MYSQL_DATABASE: luban
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - e2e-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pluban"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend-java:
+    build:
+      context: ./packages/backend/luban-backend
+    environment:
+      APP_PORT: "8080"
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DB: luban
+      MYSQL_USER: root
+      MYSQL_PASSWORD: luban
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  backend-go:
+    build:
+      context: ./packages/backend/luban-backend-go
+    environment:
+      APP_PORT: "8080"   # 容器内仍 8080，通过宿主端口映射 8081
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DB: luban
+      MYSQL_USER: root
+      MYSQL_PASSWORD: luban
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    ports:
+      - "8081:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  bff:
+    build:
+      context: ./packages/bff/luban-bff
+    environment:
+      # 默认指向 Java 后端（/backend context-path）
+      BACKEND_BASE_URL: "http://backend-java:8080/backend"
+      PORT: "3100"
+    ports:
+      - "3100:3100"
+    depends_on:
+      - backend-java
+      - backend-go
+
+  engine:
+    build:
+      context: ./packages/engine/luban
+    environment:
+      VITE_BFF_BASE_URL: "http://127.0.0.1:3100"
+    ports:
+      - "4200:4200"
+
+  website:
+    build:
+      context: ./packages/web/luban-website
+    environment:
+      NUXT_PUBLIC_BFF_BASE_URL: "http://127.0.0.1:3100"
+      NUXT_PUBLIC_DEFAULT_SITE_SLUG: "default"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - bff
+
+volumes:
+  e2e-mysql:

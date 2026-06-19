@@ -1,0 +1,22 @@
+{
+  "name": "@luban/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Luban 跨项目流程性 E2E（engine→BFF→backend→website 全链路）",
+  "scripts": {
+    "install:e2e": "playwright install chrome",
+    "install:e2e:ci": "playwright install chromium",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:engine": "playwright test --project=engine-flows",
+    "test:contract": "playwright test --project=dual-backend",
+    "test:cross": "playwright test --project=engine-flows --project=dual-backend",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.6.0"
+  }
+}
