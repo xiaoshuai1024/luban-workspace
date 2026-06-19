@@ -26,3 +26,8 @@
 	path = packages/docs/luban-architecture-design
 	url = https://github.com/xiaoshuai1024/luban-architecture-design.git
 	branch = main
+[submodule "packages/ai/luban-ai-assistant"]
+	path = packages/ai/luban-ai-assistant
+	url = https://github.com/xiaoshuai1024/luban-ai-assistant.git
+	branch = master
+	active = true
