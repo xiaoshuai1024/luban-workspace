@@ -7,7 +7,35 @@ PKG_DIRS := packages/engine/luban packages/bff/luban-bff packages/ui/luban-ui pa
 
 .PHONY: clone-all pull-all push-all pr-all sync-submodules \
         test test-coverage lint dev dev-engine dev-bff dev-website \
-        install-deps clean
+        install-deps clean \
+        e2e-up e2e-down e2e e2e-cross e2e-install e2e-report
+
+# --- E2E 服务编排 + 跨项目流程性 E2E ---
+COMPOSE_E2E := docker-compose.e2e.yml
+
+# 起 E2E 服务编排（MySQL/Redis/双后端/bff/engine/website）
+e2e-up:
+	@bash scripts/e2e/up-all.sh
+
+# 停 E2E 服务编排
+e2e-down:
+	@bash scripts/e2e/down-all.sh
+
+# 安装 Playwright 浏览器（首次）
+e2e-install:
+	cd e2e && pnpm install && pnpm run install:e2e
+
+# 跑全部跨项目流程（需先 e2e-up）
+e2e:
+	cd e2e && pnpm test
+
+# 跑跨项目黄金流程（发布/线索/双后端一致性）
+e2e-cross:
+	cd e2e && pnpm test:cross
+
+e2e-report:
+	cd e2e && pnpm report
+
 
 # 首次：初始化所有 submodule
 clone-all:

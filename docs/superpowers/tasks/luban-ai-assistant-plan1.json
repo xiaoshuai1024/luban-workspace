@@ -3,7 +3,7 @@
   "title": "Luban AI 助手 P1 — 自然语言生成/编辑页面 + 引导 + 模型切换 + 引擎集成",
   "type": "plan",
   "createdAt": "2026-06-19",
-  "status": "in_progress",
+  "status": "implemented",
   "branchStrategy": "ai 子仓 feature/luban-ai-assistant-plan1；engine 子仓 feature/luban-ai-assistant-plan1 同名分支",
   "parentProgram": "luban-ai-assistant-program",
   "dependsOnPlan": [],
@@ -19,9 +19,7 @@
       "group": "ai",
       "dependsOn": [],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "docker compose up 全容器健康; init 脚本幂等; postgres/milvus/minio 连接通; 无 GPU 依赖; deploy.sh 不硬编码 SSH 明文(从 .env.dev 注入); .env.dev 已 gitignore 未入仓",
-      "status": "done",
-      "gatePassed": true
+      "gate": "docker compose up 全容器健康; init 脚本幂等; postgres/milvus/minio 连接通; 无 GPU 依赖; deploy.sh 不硬编码 SSH 明文(从 .env.dev 注入); .env.dev 已 gitignore 未入仓"
     },
     {
       "id": "P1-T2",
@@ -32,9 +30,7 @@
         "P1-T1"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "三家 provider 单测 mock 通过; 切换仅改配置; structured output 产 Pydantic; 单测覆盖≥85%",
-      "status": "done",
-      "gatePassed": true
+      "gate": "三家 provider 单测 mock 通过; 切换仅改配置; structured output 产 Pydantic; 单测覆盖≥85%"
     },
     {
       "id": "P1-T3",
@@ -45,9 +41,7 @@
         "P1-T1"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "schema 校验单测覆盖合法/非法用例; expression 沙箱禁 eval/Function/new; 缺物料→占位不崩",
-      "status": "done",
-      "gatePassed": true
+      "gate": "schema 校验单测覆盖合法/非法用例; expression 沙箱禁 eval/Function/new; 缺物料→占位不崩"
     },
     {
       "id": "P1-T4",
@@ -58,9 +52,7 @@
         "P1-T1"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "物料知识同步幂等可重跑; hybrid 检索单测; 召回 top-k 物料正确; embedding 走云端可配置",
-      "status": "done",
-      "gatePassed": true
+      "gate": "物料知识同步幂等可重跑; hybrid 检索单测; 召回 top-k 物料正确; embedding 走云端可配置"
     },
     {
       "id": "P1-T5",
@@ -73,9 +65,7 @@
         "P1-T4"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "状态图单测各节点; checkpoint 持久化可恢复; 回环重试≤N 次; HITL 中断/恢复",
-      "status": "done",
-      "gatePassed": true
+      "gate": "状态图单测各节点; checkpoint 持久化可恢复; 回环重试≤N 次; HITL 中断/恢复"
     },
     {
       "id": "P1-T6",
@@ -86,9 +76,7 @@
         "P1-T5"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "SSE 流式单测; JWT 鉴权 401 用例; 无效 token 拒绝; 健康检查端点; 端到端单测覆盖≥85%",
-      "status": "done",
-      "gatePassed": true
+      "gate": "SSE 流式单测; JWT 鉴权 401 用例; 无效 token 拒绝; 健康检查端点; 端到端单测覆盖≥85%"
     },
     {
       "id": "P1-T7",
@@ -99,9 +87,7 @@
         "P1-T5"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "injection 检测用例; PII 脱敏不进日志/Langfuse; trace 上报可见; 输出校验失败兜底",
-      "status": "done",
-      "gatePassed": true
+      "gate": "injection 检测用例; PII 脱敏不进日志/Langfuse; trace 上报可见; 输出校验失败兜底"
     },
     {
       "id": "P1-T8",
@@ -112,9 +98,7 @@
         "P1-T6"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "engine pnpm build 零 console error; pnpm test≥85%; AI 改动入撤销栈可撤销; FeatureGate 关闭隐藏面板; PageEditor 现有功能不退化",
-      "status": "done",
-      "gatePassed": true
+      "gate": "engine pnpm build 零 console error; pnpm test≥85%; AI 改动入撤销栈可撤销; FeatureGate 关闭隐藏面板; PageEditor 现有功能不退化"
     },
     {
       "id": "P1-T9",
@@ -125,9 +109,7 @@
         "P1-T5"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "引导场景单测; 引导建议基于当前 schema; 不编造不存在的物料",
-      "status": "done",
-      "gatePassed": true
+      "gate": "引导场景单测; 引导建议基于当前 schema; 不编造不存在的物料"
     },
     {
       "id": "P1-T10",
@@ -139,10 +121,12 @@
         "P1-T9"
       ],
       "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
-      "gate": "三家模型冒烟全绿; 流式契约端到端通; 部署文档可复现; 关联 program plan 更新",
-      "status": "done",
-      "gatePassed": true
+      "gate": "三家模型冒烟全绿; 流式契约端到端通; 部署文档可复现; 关联 program plan 更新"
     }
   ],
-  "progress": "10/10 task 实现+单测全绿（AI 服务 137 测试 cov 88% / engine 83 测试 + build 零 console，新代码覆盖 86-100%）。三家模型冒烟脚本就绪待真实 key；尚未提交 PR。"
+  "implementationStatus": {
+    "code": "done",
+    "unitTests": "green",
+    "e2e": "scripts written, runtime pending"
+  }
 }

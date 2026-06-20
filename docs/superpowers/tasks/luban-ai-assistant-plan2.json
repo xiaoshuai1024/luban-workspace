@@ -1,0 +1,76 @@
+{
+  "featureId": "luban-ai-assistant-plan2",
+  "title": "Luban AI 助手 P2 — 设计稿/截图转页面（多模态）",
+  "type": "plan",
+  "createdAt": "2026-06-19",
+  "status": "implemented",
+  "branchStrategy": "ai 子仓 feature/luban-ai-assistant-plan2；engine 子仓 feature/luban-ai-assistant-plan2 同名分支",
+  "parentProgram": "luban-ai-assistant-program",
+  "dependsOnPlan": [
+    "luban-ai-assistant-plan1"
+  ],
+  "gateTargets": {
+    "ai": 0.85,
+    "engine": 0.85
+  },
+  "children": [
+    {
+      "id": "P2-T1",
+      "title": "多模态 provider 扩展(provider 抽象增 image 输入: 抹平 GLM-V/DeepSeek-VL/Qwen-VL 图片消息格式差异 + MinIO 图片上传/presigned 存取)",
+      "wave": 0,
+      "group": "ai",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan2.md",
+      "gate": "三家视觉模型 mock 单测图片消息格式一致; MinIO 上传/下载/presigned 单测; 大图压缩转码"
+    },
+    {
+      "id": "P2-T2",
+      "title": "设计稿转页面 LangGraph workflow(上传图片→多模态理解布局/组件/层级/文字→RAG检索相似物料→生成 PageSchema→Pydantic+物料/沙箱校验→HITL确认→反馈回环)",
+      "wave": 1,
+      "group": "ai",
+      "dependsOn": [
+        "P2-T1"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan2.md",
+      "gate": "workflow 各节点单测; 布局→物料映射规则可测; 校验失败回环; HITL; checkpoint 恢复"
+    },
+    {
+      "id": "P2-T3",
+      "title": "FastAPI 设计稿端点(POST /ai/design-to-page SSE 流式: 上传→理解进度→生成→确认; 复用 P1 JWT 鉴权 + guardrails)",
+      "wave": 1,
+      "group": "ai",
+      "dependsOn": [
+        "P2-T2"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan2.md",
+      "gate": "SSE 流式单测; 图片大小/类型校验(拒非图/超大); JWT 401; 错误体对齐 P1"
+    },
+    {
+      "id": "P2-T4",
+      "title": "engine 设计稿上传 UI(拖拽/粘贴/选择图片) + 结果预览(原图↔生成 schema 对照) + 应用到画布(HITL 确认+撤销栈) 嵌入 P1 AI 面板",
+      "wave": 2,
+      "group": "engine",
+      "dependsOn": [
+        "P2-T3"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan2.md",
+      "gate": "engine pnpm build 零 console error; pnpm test≥85%; 上传/预览/确认/撤销 E2E; FeatureGate ai.design_to_page"
+    },
+    {
+      "id": "P2-T5",
+      "title": "设计稿转页面 eval(样本集≥N: 设计稿+期望 schema + Ragas/DeepEval 自动评测 布局还原度/物料正确性/props 合法率 + Langfuse dataset 回归)",
+      "wave": 2,
+      "group": "ai",
+      "dependsOn": [
+        "P2-T2"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan2.md",
+      "gate": "样本集入库; eval 脚本可重跑; 合法率/还原度指标基线; 回归纳入 CI(询问用户后)"
+    }
+  ],
+  "implementationStatus": {
+    "code": "done",
+    "unitTests": "green",
+    "e2e": "scripts written, runtime pending"
+  }
+}
