@@ -341,3 +341,36 @@ describe("Material API contract", () => {
 8. 缓存失效逻辑是否两端一致？
 9. DB schema 变更是否两端共用迁移脚本？
 10. 若有差异，是否在 PR 中标注并说明理由？
+
+---
+
+## 经验：Go JSON 列必须用 json.RawMessage（禁 []byte）+ 显式列名
+
+### 场景
+新增含 JSON 列的表（datasource/page schema/collection/seo/analytics_config），Go 端用 `[]byte` 字段 + `SELECT *` 查询，导致：
+- JSON 字段经 BFF/engine 消费时被 base64 编码（`"schema":"eyJyb290..."` 而非对象）
+- `SELECT *` 加列后列顺序变化，sqlx StructScan 静默错位
+
+### 根因
+Go 的 `[]byte` 在 `json.Marshal` 时默认 base64 编码；`json.RawMessage`（`type RawMessage []byte`）实现了 `MarshalJSON`/`UnmarshalJSON`，原样透传 JSON。sqlx 的 StructScan 对 `SELECT *` 的列顺序敏感，新增列后顺序不一致会静默映射错。
+
+### 解决方案
+```go
+// model/collection.go — 正确
+type Collection struct {
+    ID           string          `db:"id" json:"id"`
+    FieldSchema  json.RawMessage `db:"field_schema_json" json:"fieldSchema"`  // ✅ RawMessage
+    // FieldSchema []byte         `db:"field_schema_json" json:"fieldSchema"` // ❌ base64 坑
+}
+
+// repository/collection_repo.go — 显式列名
+const collectionColumns = `id, site_id, name, field_schema_json, status, created_at, updated_at`
+// 查询用：SELECT id, site_id, ... FROM collections  （禁 SELECT *）
+```
+Java 端：实体 `String`（存 JSON 字符串），DTO `JsonNode`/`ObjectNode`（自动序列化为 JSON 对象）。
+
+### 预防
+- Go 任何 JSON 列字段 **必须** `json.RawMessage`，**禁止** `[]byte`/`string`
+- Go 任何 repo 查询 **必须** 显式列名列常量，**禁止** `SELECT *`（加列即错位）
+- 双端字段名（JSON tag）**必须** 一致（如 `fieldSchema` 两端同名）
+- contract test 覆盖 JSON 列往返（存对象→取对象，断言非 base64 字符串）
