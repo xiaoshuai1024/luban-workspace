@@ -44,6 +44,7 @@ luban-workspace/                  # meta 仓
 | `luban-frontend-ux-enum.md` | 交互组件决策树 + 枚举中文映射（基准 luban-ui） | 编辑 .vue 时 |
 | `luban-cross-cutting-standards.md` | 双后端契约/BFF字段/引擎物料schema/多端一致/分页错误体 | 跨模块新功能、合入前 |
 | `luban-lowcode-engine-quality.md` | 引擎门槛：零console/物料schema/各端渲染一致 | 编辑 engine/ui 时 |
+| `luban-codegraph-usage.md` | 优先用 CodeGraph MCP 工具做代码结构查询（codegraph_*） | 查代码结构/调用链/影响分析前 |
 | `luban-dual-backend-parity.md` | Java/Go 同接口行为一致 | 编辑任一后端时 |
 | `luban-material-schema.md` | 物料注册/props schema/版本 | 编辑物料/引擎 schema 时 |
 | `luban-multi-client-consistency.md` | electron/flutter/web 业务一致 | 编辑 client/* 时 |
