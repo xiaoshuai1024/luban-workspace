@@ -68,6 +68,7 @@ luban-workspace/                  # meta 仓
 | `docs/LOWCODE_ENGINE_SPEC.md` | 低代码引擎/物料/schema 规范 |
 | `docs/DUAL_BACKEND_PARITY.md` | Java/Go 双后端契约对齐 |
 | `docs/UI_SPEC.md` | luban 设计 token / 组件规范摘要 |
+| `docs/SYSTEM_ARCHITECTURE.md` | **服务拓扑 SSOT**：各系统角色/端口/依赖/启动方式（Makefile dev-* target）/已知陷阱 |
 | `docs/dev/INDEX.md` | 技术经验库索引（调试/安全/Java标准/后端日志/事故方法论等，从 kangdou 迁移） |
 
 ---
