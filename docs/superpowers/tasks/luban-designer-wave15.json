@@ -1,0 +1,198 @@
+{
+  "featureId": "luban-designer-wave15",
+  "title": "Luban 设计器 Wave 1.5：精细样式系统 + 营销建站组件全量目录 + LeadCapture 闭环 + Cypress 全链路 E2E",
+  "type": "plan",
+  "createdAt": "2026-06-20",
+  "status": "implemented",
+  "branchStrategy": "各子仓 feature/luban-designer-wave15 同名分支；meta 仓 feature/luban-designer-wave15",
+  "gateTargets": {
+    "engine": 0.85,
+    "bff": 0.85,
+    "website": 0.85,
+    "ui": 0.9,
+    "java": 0.8,
+    "go": 0.75
+  },
+  "children": [
+    {
+      "id": "D15-A1",
+      "title": "NodeSchema 扩展 style?:Record<string,string> + className?:string（low-code canonical，engine re-export）",
+      "wave": 0,
+      "group": "ui",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "NodeSchema 单一定义（low-code canonical，engine re-export）；build 绿；engine @/types/schema 同步",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-A2",
+      "title": "样式渲染接线：DesignRenderer wrapper div 绑 :style/:class；RuntimeRenderer componentProps 注入 style/class（inheritAttrs fallback + runtime wrapper 兜底）",
+      "wave": 1,
+      "group": "ui",
+      "dependsOn": [
+        "D15-A1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "设计态 wrapper :style 生效；runtime 预览渲染一致；inheritAttrs:false 组件由 wrapper 兜底；组件级单测",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-A3",
+      "title": "PropertyPanel 全量样式分区（尺寸/背景/边框/排版/布局/阴影）+ update:style emit + PageEditor onUpdateStyle 入撤销栈",
+      "wave": 2,
+      "group": "engine",
+      "dependsOn": [
+        "D15-A1",
+        "D15-A2",
+        "D15-D1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "5 组控件可配；画布实时预览；撤销栈记录；预览模式样式生效；FeatureGate editor.style 包裹",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-B1",
+      "title": "R2 数据源管理弹窗 DatasourceManageDialog（CRUD 调 createDatasource/updateDatasource/deleteDatasource）+ 测试连通按钮（testDatasource）+ 下拉刷新",
+      "wave": 1,
+      "group": "engine",
+      "dependsOn": [
+        "D15-D1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "弹层 CRUD 写入；测试连通显示 ok/message/latencyMs；CRUD 后下拉刷新；FeatureGate 包裹",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-B2",
+      "title": "R3 四态对齐：数据源/事件区 v-loading + 错误卡片+重试 + 成功反馈 ElMessage",
+      "wave": 2,
+      "group": "engine",
+      "dependsOn": [
+        "D15-B1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "加载/空/错/成功四态可触发；与 PageEditor 错误卡片一致",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-C1",
+      "title": "Y3 ComponentTree 锁定/隐藏图标 + locked 节点删除禁用 + useKeyboard L(锁)/H(隐) 快捷键 + PageEditor lock/hide handler 入栈",
+      "wave": 1,
+      "group": "engine",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "锁定节点删按钮禁用；L/H 快捷键生效；lock/hide 入撤销栈；useKeyboard 单测扩 L/H 分支",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-D1",
+      "title": "FeatureGate 系统：src/config/features.ts（VITE_FEATURE_* env，默认全开）+ isFeatureEnabled() + 消费点 v-if 包裹",
+      "wave": 0,
+      "group": "engine",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "默认全开；env 关闭时 UI 区隐藏；单测 features.spec.ts 覆盖默认+关闭",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-E0",
+      "title": "数组编辑器基建：PropSchemaItem 扩 type:'array' + itemFields?:PropSchema；compat.ts object-item array→'array'（保 itemFields）；PropertyPanel 数组控件（复用 options 模式参数化 itemFields）",
+      "wave": 0,
+      "group": "ui",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "object-item array 不再降级 json；可视化列表+增删+字段表单；LubanSelect/LubanTable 回归绿；单测覆盖",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-E1",
+      "title": "新建 9 个营销/建站组件：LubanNavbar / LubanFooter / LubanFeatureGrid / LubanStats / LubanFAQ / LubanPricing / LubanTestimonialCarousel / LubanGallery / LubanLogoCloud（Vue + material.ts + $lb-* token）",
+      "wave": 1,
+      "group": "ui",
+      "dependsOn": [
+        "D15-E0"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "9 组件渲染正确；数组 props 走可视化编辑器；消费 $lb-* token 零硬编码 hex；material-parity spec 扩断言",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-E2",
+      "title": "升级 4 个现有营销组件：LubanLeadCapture 接 LubanForm 提交链路(formId+formState绑+submit) / LubanHero 补 secondaryCta+layout 变体 / LubanCTA 补 secondaryCta+fullWidth / LubanTestimonial rating 完善",
+      "wave": 1,
+      "group": "ui",
+      "dependsOn": [
+        "D15-E0"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "LeadCapture 可提交生成 lead；Hero/CTA 新 props 生效；4 组件 token 化；material-parity 绿",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-E3",
+      "title": "LeadCapture 提交链路接线：RuntimeRenderer @submit 分支扩匹配 LubanLeadCapture；lead-capture material 加 formId 字段；website DynamicPage extractSubmitConfig 支持 LeadCapture",
+      "wave": 2,
+      "group": "ui",
+      "dependsOn": [
+        "D15-E2"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "LeadCapture 提交 POST /api/forms/:id/submit 成功；dedup/spam 错误透传；website 端 SSR 闭环；不破坏现有 LubanForm 链路",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-E4",
+      "title": "调色板重组：palette.ts 扩 toPaletteCategory（信息/布局/表单/营销/导航/反馈/数据展示 七组）+ materials/index.ts 注册 9 新物料 + re-export",
+      "wave": 1,
+      "group": "ui",
+      "dependsOn": [
+        "D15-E1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "7 组全部可见；6 个原隐藏组件(Table/Menu/Tabs/Modal/Drawer/Toast)首次进调色板；去重稳定顺序",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-F1",
+      "title": "Cypress designer.cy.ts 扩 Wave1.5：样式面板配置+实时预览+撤销；数据源 CRUD 弹窗+测试连通；ComponentTree 锁定+L 键；预览样式生效",
+      "wave": 3,
+      "group": "engine",
+      "dependsOn": [
+        "D15-A3",
+        "D15-B1",
+        "D15-C1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "cypress run 真绿；沿用 loginReal+before API seed 模式；不放宽断言",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-F2",
+      "title": "Cypress designer-marketing.cy.ts：拖拽营销组件组装完整落地页 + 配数组 props + 保存 + 发布成功断言",
+      "wave": 3,
+      "group": "engine",
+      "dependsOn": [
+        "D15-E4",
+        "D15-F1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "Navbar/Hero/FeatureGrid/Pricing/FAQ/Footer 拖拽组装；数组编辑器交互；发布 status=published 断言；真绿",
+      "status": "implemented"
+    },
+    {
+      "id": "D15-F3",
+      "title": "Cypress designer-publish-flow.cy.ts：Hero+LeadCapture 组装+提交配置+发布+访问 website SSR 断言（闭环到 website）",
+      "wave": 3,
+      "group": "engine",
+      "dependsOn": [
+        "D15-E3",
+        "D15-F1"
+      ],
+      "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
+      "gate": "LeadCapture 提交生成 lead；website /{slug}/{path} SSR 渲染断言；闭环真绿",
+      "status": "implemented"
+    }
+  ],
+  "completedAt": "2026-06-21",
+  "notes": "All 15 tasks implemented + verified. Unit suites green (low-code 138/138, base 2/2, engine 77/77). Cypress E2E all green (F1:10 + F2:4 + F3:2 = 16/16) on Cypress 15 + Node24, full stack (bff/java/website/engine + dev server middleware)."
+}

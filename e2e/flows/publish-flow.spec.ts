@@ -88,7 +88,7 @@ test.describe('流程A：发布闭环 @cross', () => {
     if (!siteId) return;
     try {
       const ctx = await request.newContext();
-      const headers = { luban_token: token };
+      const headers = { Authorization: `Bearer ${token}` };
       if (pageId) await ctx.delete(`${BFF_BASE}/api/sites/${siteId}/pages/${pageId}`, { headers }).catch(() => {});
       await ctx.delete(`${BFF_BASE}/api/sites/${siteId}`, { headers }).catch(() => {});
       await ctx.dispose();
@@ -100,36 +100,43 @@ test.describe('流程A：发布闭环 @cross', () => {
 
 // ---------- helpers ----------
 
+/** 转义正则特殊字符，用于把字面量安全拼进 RegExp（如 toHaveTitle 断言）。 */
+function escapeRegex(s: string): string {
+  // eslint-disable-next-line no-useless-escape
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function createSiteViaBff(): Promise<string> {
   const ctx = await request.newContext();
   const r = await ctx.post(`${BFF_BASE}/api/sites`, {
-    headers: { luban_token: token, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     data: { name: SITE_NAME, slug: SITE_SLUG, baseUrl: `http://${SITE_SLUG}.test`, status: 'active' },
   });
-  await ctx.dispose();
   expect(r.status(), `建站点须成功，实际 ${r.status()}`).toBeLessThan(300);
   const body = await r.json();
+  await ctx.dispose();
   return body.id ?? body.data?.id ?? '';
 }
 
 async function createPageViaBff(sid: string): Promise<string> {
   const ctx = await request.newContext();
   const r = await ctx.post(`${BFF_BASE}/api/sites/${sid}/pages`, {
-    headers: { luban_token: token, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     data: { name: PAGE_NAME, path: PAGE_PATH, schema: MIN_SCHEMA, status: 'draft' },
   });
-  await ctx.dispose();
   expect(r.status(), `建页面须成功，实际 ${r.status()}`).toBeLessThan(300);
   const body = await r.json();
+  await ctx.dispose();
   return body.id ?? body.data?.id ?? '';
 }
 
 async function publishPageViaBff(sid: string, pid: string) {
   const ctx = await request.newContext();
   const r = await ctx.put(`${BFF_BASE}/api/sites/${sid}/pages/${pid}`, {
-    headers: { luban_token: token, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     data: { name: PAGE_NAME, path: PAGE_PATH, schema: MIN_SCHEMA, status: 'published' },
   });
-  await ctx.dispose();
   expect(r.status(), `发布须成功，实际 ${r.status()}`).toBeLessThan(300);
+  await r.dispose();
+  await ctx.dispose();
 }

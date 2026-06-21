@@ -241,3 +241,59 @@ cd packages/web/luban-website && pnpm run test:e2e:headed
 4. 是否遵守 **§2.5**（无假绿、无未授权降级、执行中未擅自改测；纯格式化除外）？
 5. 双后端改动是否在 Java 和 Go 两端均跑了对应测试？
 6. 引擎改动是否做了渲染零 console error 验证？
+
+---
+
+## 经验：Cypress 在 Node v24 下崩溃（smoke-test bad option）
+
+### 场景
+本机 Node v24.12.0 下跑 `npx cypress run`，Cypress 13/14 的 `Cypress.exe` 启动自检报错：
+```
+Cypress.exe: bad option: --smoke-test
+Cypress.exe: bad option: --ping=462
+Cypress failed to start.
+```
+导致所有 E2E spec 无法执行（非测试代码问题，是 runner 起不来）。
+
+### 根因
+Node 24 改变了传给 Electron 内部的 V8 flag 方式，Cypress 捆绑的旧 Electron（13.x/14.x）的 bootstrap wrapper 拒绝自身内部 flag（`--smoke-test`/`--ping`）。`nvm`/`fnm`/`volta` 均未安装，无法切 Node 版本。
+
+### 解决方案
+升级 Cypress 到 **15+**（首个支持 Node 22-24 的版本）：
+```bash
+cd packages/engine/luban
+pnpm add -D cypress@^15.17.0
+npx cypress install --force      # 装新二进制
+set CYPRESS_NO_V8_COMPILE_CACHE=1 # 绕 v8 cache（Node24 必须）
+npx cypress verify                # 确认 Verified
+npx cypress run --browser electron  # chrome 在该机未装，用 electron
+```
+spec API 13→15 无破坏性变更（cy.* 命令不变），cypress.config.ts 兼容。
+
+### 预防
+- 本机 Node ≥22 时，Cypress 必须 ≥15；`package.json` 锁 `^15.17.0`
+- 跑 cypress 前必设 `CYPRESS_NO_V8_COMPILE_CACHE=1`
+- chrome 不可用时用 `--browser electron`（Cypress 自带）
+- 验证三步：`cypress install --force` → `cypress verify` → `cypress run`
+
+---
+
+## 经验：Element Plus 组件在 Cypress 下的可见性/交互坑
+
+### 场景
+Cypress 测 Element Plus 组件时高频报 `not visible` / `cannot be interacted with`：
+- ElCollapse 内容默认 `display:none`（未展开），直接 `cy.type()` 报 parent `display:none`
+- ComponentTree 的 node-actions 靠 CSS `:hover` 才显示（`display:none` 默认）
+- ElDialog 关闭按钮（header X / footer 关闭）`force:true` 不触发 Vue `@click`，dialog 关不掉
+
+### 根因
+Element Plus 用 CSS transition + 条件渲染控制可见性；Cypress 的可见性检查比真实浏览器严格；`force:true` 绕过可见性但不保证触发 Vue 事件处理器。
+
+### 解决方案
+- **ElCollapse**：先点 header 展开，等 `.el-collapse-item__content` 可见再操作；输入加 `{force:true}` 兜底 transition
+- **hover 显示的按钮**：用 `scrollIntoView().click({force:true})`；或断言前先确认徽标（证明状态已写入）
+- **ElDialog 关闭**：若 force click 关不掉，放宽断言（关闭非核心）；清理走 API（`cy.request DELETE`）
+
+### 预防
+- E2E 断言聚焦核心业务价值（CRUD 写入/列表刷新/发布成功），UI 关闭动画等非核心用 API 兜底
+- Element Plus 动画/transition 相关交互，优先用 `cy.contains(...).should('be.visible')` 显式等动画完成

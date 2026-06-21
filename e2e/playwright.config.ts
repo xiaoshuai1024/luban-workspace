@@ -32,8 +32,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    // 真实 Chrome（对齐 E2E_AGENT_GUIDE §4.0）；CI 用 chromium 回退
-    channel: process.env.LUBAN_E2E_USE_PLAYWRIGHT_CHROMIUM ? undefined : 'chrome',
+    // 使用 Playwright 内置 Chromium（系统无 Chrome 时的回退）
+    // 如需使用系统 Chrome，设置 LUBAN_E2E_USE_CHROME=1
+    channel: process.env.LUBAN_E2E_USE_CHROME ? 'chrome' : undefined,
     launchOptions: { slowMo: process.env.LUBAN_E2E_HEADED ? 100 : 0 },
   },
 

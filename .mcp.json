@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "codegraph": {
+      "command": "codegraph-mcp",
+      "args": [
+        "--embedding-model", "bge-small",
+        "--max-files", "8000",
+        "--exclude", "node_modules",
+        "--exclude", ".worktrees",
+        "--exclude", ".e2e-tmp",
+        "--exclude", "dist",
+        "--exclude", ".next",
+        "--exclude", "target"
+      ],
+      "env": {
+        "CODEGRAPH_TELEMETRY": "off",
+        "HF_ENDPOINT": "https://hf-mirror.com"
+      }
+    }
+  }
+}

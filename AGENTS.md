@@ -44,6 +44,7 @@ luban-workspace/                  # meta 仓
 | `luban-frontend-ux-enum.md` | 交互组件决策树 + 枚举中文映射（基准 luban-ui） | 编辑 .vue 时 |
 | `luban-cross-cutting-standards.md` | 双后端契约/BFF字段/引擎物料schema/多端一致/分页错误体 | 跨模块新功能、合入前 |
 | `luban-lowcode-engine-quality.md` | 引擎门槛：零console/物料schema/各端渲染一致 | 编辑 engine/ui 时 |
+| `luban-codegraph-usage.md` | 优先用 CodeGraph MCP 工具做代码结构查询（codegraph_*） | 查代码结构/调用链/影响分析前 |
 | `luban-dual-backend-parity.md` | Java/Go 同接口行为一致 | 编辑任一后端时 |
 | `luban-material-schema.md` | 物料注册/props schema/版本 | 编辑物料/引擎 schema 时 |
 | `luban-multi-client-consistency.md` | electron/flutter/web 业务一致 | 编辑 client/* 时 |
@@ -68,6 +69,7 @@ luban-workspace/                  # meta 仓
 | `docs/LOWCODE_ENGINE_SPEC.md` | 低代码引擎/物料/schema 规范 |
 | `docs/DUAL_BACKEND_PARITY.md` | Java/Go 双后端契约对齐 |
 | `docs/UI_SPEC.md` | luban 设计 token / 组件规范摘要 |
+| `docs/SYSTEM_ARCHITECTURE.md` | **服务拓扑 SSOT**：各系统角色/端口/依赖/启动方式（Makefile dev-* target）/已知陷阱 |
 | `docs/dev/INDEX.md` | 技术经验库索引（调试/安全/Java标准/后端日志/事故方法论等，从 kangdou 迁移） |
 
 ---
