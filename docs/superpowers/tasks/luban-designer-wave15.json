@@ -164,7 +164,7 @@
       ],
       "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
       "gate": "cypress run 真绿；沿用 loginReal+before API seed 模式；不放宽断言",
-      "status": "spec-written-blocked"
+      "status": "implemented"
     },
     {
       "id": "D15-F2",
@@ -177,7 +177,7 @@
       ],
       "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
       "gate": "Navbar/Hero/FeatureGrid/Pricing/FAQ/Footer 拖拽组装；数组编辑器交互；发布 status=published 断言；真绿",
-      "status": "spec-written-blocked"
+      "status": "implemented"
     },
     {
       "id": "D15-F3",
@@ -190,9 +190,9 @@
       ],
       "planFile": ".agents/plans/2026-06-20-luban-designer-wave15.md",
       "gate": "LeadCapture 提交生成 lead；website /{slug}/{path} SSR 渲染断言；闭环真绿",
-      "status": "spec-written-blocked"
+      "status": "implemented"
     }
   ],
   "completedAt": "2026-06-21",
-  "notes": "Code complete for ui+engine+website (Wave0-2). E2E specs (F1/F2/F3) written+committed but Cypress execution blocked by Node24/Cypress binary incompatibility on dev machine. Unit suites all green. E2E requires Node 22/20 env."
+  "notes": "All 15 tasks implemented + verified. Unit suites green (low-code 138/138, base 2/2, engine 77/77). Cypress E2E all green (F1:10 + F2:4 + F3:2 = 16/16) on Cypress 15 + Node24, full stack (bff/java/website/engine + dev server middleware)."
 }
