@@ -104,6 +104,7 @@ luban-workspace/                  # meta 仓
 `/flyway-squash` — Java 后端 DB 迁移整理
 `/prod-debug` `/prod-testing` — 生产调试/测试
 `/prd` `/effort` `/write-ex` `/feishu-doc` — 辅助
+`/pua` — 大厂 PUA 话术驱动 AI 穷尽方案再放弃（源自 [tanweai/pua](https://github.com/tanweai/pua)，本地化于 `.agents/skills/pua/`）
 
 ---
 
@@ -111,15 +112,16 @@ luban-workspace/                  # meta 仓
 
 0. **信息完整性**：需求/信息有缺口须先询问（`luban-no-speculation`）
 1. **每日远端同步检查**：pending JSON 弹窗
-2. **加载核心文档**：`SUPERPOWERS` / `GIT_WORKFLOW`
-3. **加载项目级 skills**：`.agents/skills/`
-4. **检查 MCP memory**
-5. **协作粒度**：能开 subagent 就并行
-6. **Git 分支检查**：第一次写入前；默认留用户当前分支
-7. **Worktree 约定**：计划类用 `.worktrees/`
-8. **双后端提醒**：改 backend 时检查是否需同步另一端
-9. **低代码引擎提醒**：改 engine/ui/schema 时检查各端渲染一致
-10. **非沙箱权限确认**：新会话执行非沙箱命令前询问
+2. **优化待办扫描**：启动新迭代或排期规划前，扫描根目录 `TODO.md`，列出所有 `status ≠ done` 的条目并提示排进迭代
+3. **加载核心文档**：`SUPERPOWERS` / `GIT_WORKFLOW`
+4. **加载项目级 skills**：`.agents/skills/`
+5. **检查 MCP memory**
+6. **协作粒度**：能开 subagent 就并行
+7. **Git 分支检查**：第一次写入前；默认留用户当前分支
+8. **Worktree 约定**：计划类用 `.worktrees/`
+9. **双后端提醒**：改 backend 时检查是否需同步另一端
+10. **低代码引擎提醒**：改 engine/ui/schema 时检查各端渲染一致
+11. **非沙箱权限确认**：新会话执行非沙箱命令前询问
 
 ---
 

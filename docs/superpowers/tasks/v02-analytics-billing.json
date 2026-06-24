@@ -1,0 +1,47 @@
+{
+  "featureId": "v02-analytics-billing",
+  "title": "v02 转化分析 + 商业化骨架",
+  "plan": "../../docs/superpowers/plans/2026-06-17-v02-analytics-billing-skeleton.md",
+  "notes": "校验脚本 scripts/verify-plan-ssot.mjs 为 stub，JSON 合规性人工保证。Go 后端本期 parity 显式豁免（issue 追赶）。",
+  "tasks": [
+    { "id": "T-be-1", "group": "backend-java", "wave": 1, "subsystem": "backend-java", "title": "schema.sql 增 plans/subscriptions/usage_counters/trial_records + analytics_events/analytics_daily + ab_experiments/ab_variants/ab_assignments 共 8 表", "dependsOn": [], "status": "todo" },
+    { "id": "T-be-2", "group": "backend-java", "wave": 1, "subsystem": "backend-java", "title": "billing 域：Plan/Subscription/Trial/Quota entity+mapper+service+controller（三档 Free/Starter/Growth，价格=0）", "dependsOn": ["T-be-1"], "status": "todo" },
+    { "id": "T-be-3", "group": "backend-java", "wave": 1, "subsystem": "backend-java", "title": "Plan→Gate 放行改造：FeatureGateService 从「按 site」改为「按 plan」+ 向后兼容旧 gate_key", "dependsOn": ["T-be-2"], "status": "todo" },
+    { "id": "T-be-4", "group": "backend-java", "wave": 1, "subsystem": "backend-java", "title": "用量统计 + 超限拦截：QuotaInterceptor 中间件（Lead 数/页面数/访问量），原子 ON DUPLICATE KEY UPDATE", "dependsOn": ["T-be-2"], "status": "todo" },
+    { "id": "T-be-5", "group": "backend-java", "wave": 1, "subsystem": "backend-java", "title": "试用期：14 天 Starter 试用 + 到期降 Free 状态机 + 定时任务", "dependsOn": ["T-be-2"], "status": "todo" },
+
+    { "id": "T-be-6", "group": "backend-java", "wave": 2, "subsystem": "backend-java", "title": "analytics 域：AnalyticsEvent 接收 controller（免鉴权+限流）+ service + AES 脱敏 source_ip", "dependsOn": ["T-be-1"], "status": "todo" },
+    { "id": "T-be-7", "group": "backend-java", "wave": 2, "subsystem": "backend-java", "title": "analytics_daily 预聚合：定时任务聚合 analytics_events → 每日物化表", "dependsOn": ["T-be-6"], "status": "todo" },
+    { "id": "T-be-8", "group": "backend-java", "wave": 2, "subsystem": "backend-java", "title": "analytics 查询 controller：转化漏斗/归因/趋势（聚合 leads+analytics_daily）", "dependsOn": ["T-be-7"], "status": "todo" },
+
+    { "id": "T-be-9", "group": "backend-java", "wave": 3, "subsystem": "backend-java", "title": "ab 域：Experiment/Variant/Assignment entity+mapper+service（一致性哈希 + 持久化分桶）+ 单页单 running 约束", "dependsOn": ["T-be-1"], "status": "todo" },
+    { "id": "T-be-10", "group": "backend-java", "wave": 3, "subsystem": "backend-java", "title": "ab controller：CRUD experiment + GET /ab/assign（访客侧分流，免鉴权）+ 管理端报表", "dependsOn": ["T-be-9"], "status": "todo" },
+    { "id": "T-be-11", "group": "backend-java", "wave": 3, "subsystem": "backend-java", "title": "显著性检验：χ² 检验（Apache Commons Math）+ 转化率/置信区间/p-value 返回", "dependsOn": ["T-be-10"], "status": "todo" },
+
+    { "id": "T-bff-1", "group": "bff", "wave": 2, "subsystem": "bff", "title": "billing 路由：GET /api/billing/me（plan/quota/usage）+ 管理端 plan 切换", "dependsOn": ["T-be-2"], "status": "todo" },
+    { "id": "T-bff-2", "group": "bff", "wave": 2, "subsystem": "bff", "title": "analytics 事件接收路由：POST /api/public/analytics/events（限流 + 透传）", "dependsOn": ["T-be-6"], "status": "todo" },
+    { "id": "T-bff-3", "group": "bff", "wave": 3, "subsystem": "bff", "title": "analytics 查询路由：漏斗/归因/趋势 + ab 实验报表", "dependsOn": ["T-be-8", "T-be-10"], "status": "todo" },
+    { "id": "T-bff-4", "group": "bff", "wave": 3, "subsystem": "bff", "title": "ab 分流路由：GET /api/public/ab/assign + 管理端 experiment CRUD", "dependsOn": ["T-be-10"], "status": "todo" },
+    { "id": "T-bff-5", "group": "bff", "wave": 2, "subsystem": "bff", "title": "用量拦截中间件：读 plan quota → 超 429 + 友好错误体", "dependsOn": ["T-be-4"], "status": "todo" },
+
+    { "id": "T-web-1", "group": "website", "wave": 1, "subsystem": "web", "title": "Lead 链路补归因：useUtm 解析 ?utm_* + visitorId cookie + DynamicPage 透传 channelId", "dependsOn": [], "status": "todo" },
+    { "id": "T-web-2", "group": "website", "wave": 2, "subsystem": "web", "title": "埋点 SDK：plugins/analytics.client.ts + composables/useAnalytics.ts（pageview/form_expose/form_submit）", "dependsOn": ["T-web-1"], "status": "todo" },
+    { "id": "T-web-3", "group": "website", "wave": 3, "subsystem": "web", "title": "ab 分流接入：server middleware 注入变体 + DynamicPage 渲染变体 schema", "dependsOn": ["T-bff-4", "T-web-1"], "status": "todo" },
+    { "id": "T-web-4", "group": "website", "wave": 2, "subsystem": "web", "title": "vitest 配置 + useAnalytics/useUtm/useAbAssign 单测（T-005 止血）", "dependsOn": ["T-web-2"], "status": "todo" },
+
+    { "id": "T-eng-1", "group": "engine", "wave": 2, "subsystem": "engine", "title": "api/billing.ts + api/analytics.ts + api/ab.ts（封装 BFF 路由）", "dependsOn": ["T-bff-1"], "status": "todo" },
+    { "id": "T-eng-2", "group": "engine", "wave": 3, "subsystem": "engine", "title": "Analytics 一级菜单 + 报表页（site 汇总 + page 下钻 + ab 视图 tab）", "dependsOn": ["T-eng-1", "T-bff-3"], "status": "todo" },
+    { "id": "T-eng-3", "group": "engine", "wave": 3, "subsystem": "engine", "title": "ab 实验管理页：experiment 列表 + 创建（选 page/变体/权重）+ 结束/查看显著性", "dependsOn": ["T-bff-4"], "status": "todo" },
+    { "id": "T-eng-4", "group": "engine", "wave": 2, "subsystem": "engine", "title": "套餐信息展示：用户菜单 plan 标识 + 用量进度条 + 升级提示（引导，非支付）", "dependsOn": ["T-bff-1"], "status": "todo" },
+
+    { "id": "T-ui-1", "group": "ui", "wave": 3, "subsystem": "ui", "title": "图表物料（可选）：转化率趋势/漏斗组件（若 luban-ui 现有组件不足则新增，否则复用）", "dependsOn": [], "status": "todo" },
+
+    { "id": "T-e2e", "group": "cross", "wave": 4, "subsystem": "cross", "title": "E2E：engine-e2e(Analytics 报表 + ab 管理 + 套餐用量) + website-e2e(埋点采集 + ab 分流 + 归因) + 多租户隔离", "dependsOn": ["T-eng-2", "T-eng-3", "T-web-3"], "status": "todo" }
+  ],
+  "waves": {
+    "1": { "label": "W1 基础：billing 域 + 归因字段补全（并行）", "tasks": ["T-be-1", "T-be-2", "T-be-3", "T-be-4", "T-be-5", "T-web-1"] },
+    "2": { "label": "W2 采集：事件存储 + 埋点 SDK + billing/bff 路由（并行）", "tasks": ["T-be-6", "T-be-7", "T-be-8", "T-bff-1", "T-bff-2", "T-bff-5", "T-web-2", "T-web-4", "T-eng-1", "T-eng-4"] },
+    "3": { "label": "W3 报表 + ab 引擎（并行）", "tasks": ["T-be-9", "T-be-10", "T-be-11", "T-bff-3", "T-bff-4", "T-web-3", "T-eng-2", "T-eng-3", "T-ui-1"] },
+    "4": { "label": "W4 验收", "tasks": ["T-e2e"] }
+  }
+}
