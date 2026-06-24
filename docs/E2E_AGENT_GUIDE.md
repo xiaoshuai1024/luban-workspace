@@ -6,16 +6,34 @@
 
 ## 1. E2E 类型与所属目录
 
-| 类型 | 目录 / 入口 | 典型命令 |
-|------|----------------|----------|
-| **引擎渲染 E2E** | `packages/engine/luban/tests/e2e/` | `cd packages/engine/luban && pnpm run test:e2e` |
-| **website SSR E2E** | `packages/web/luban-website/tests/e2e/` | `cd packages/web/luban-website && pnpm run test:e2e` |
-| **UI 物料 E2E** | `packages/ui/luban-ui/tests/e2e/` | `cd packages/ui/luban-ui && pnpm run test:e2e` |
-| **client Electron E2E** | `packages/client/luban-electron/tests/e2e/` | `cd packages/client/luban-electron && pnpm run test:e2e` |
-| **client Flutter WebView E2E** | `packages/client/luban-flutter/e2e/` | `cd packages/client/luban-flutter && flutter test e2e/` |
-| **BFF 集成 E2E** | `packages/bff/luban-bff/tests/e2e/` | `cd packages/bff/luban-bff && pnpm run test:e2e` |
-| **后端 Java 集成测** | `packages/backend/luban-backend/src/test/java/**/*IT.java` | `cd packages/backend/luban-backend && mvn -q verify` |
-| **后端 Go 集成测** | `packages/backend/luban-backend-go/**/*_test.go` | `cd packages/backend/luban-backend-go && go test ./...` |
+> ⚠️ **现状 vs 目标态（2026-06-19 校准）**：下表「现状」为实测，「目标」为 `luban-e2e-strategy` plan 落地后口径。**全栈统一 Playwright**（见 `luban-e2e-strategy` plan）。迁移未完成的项以「现状」列命令为准。
+
+| 类型 | 现状（实测） | 目标态（plan 落地后） | 典型命令 |
+|------|----------------|----------------|----------|
+| **引擎渲染 E2E** | ⚠️ Cypress `packages/engine/luban/cypress/e2e/*.cy.ts`（含 mock-token 假绿，见 §1.3） | Playwright `packages/engine/luban/e2e/*.spec.ts`（去假绿，真实登录） | 现状：`cd packages/engine/luban && pnpm run e2e` ；目标：`pnpm run test:e2e` |
+| **website SSR E2E** | 🔴 **无**（零测试） | Playwright `packages/web/luban-website/e2e/` | 目标：`cd packages/web/luban-website && pnpm run install:e2e && pnpm run test:e2e` |
+| **UI 物料 E2E** | ⚠️ nx+Cypress `packages/ui/luban-ui/apps/luban-ui-e2e/`（仅骨架）；`packages/luban-{base,low-code}/test/e2e/*.e2e.spec.ts` 实为 vitest jsdom 组件测 | Playwright（正名组件测为 `test/component/`） | 现状：`cd packages/ui/luban-ui && pnpm run test:e2e` |
+| **client Electron/Flutter E2E** | 🔴 **子项目不存在**（空目录，非 submodule） | 待 client 子项目落地后另立 plan | — |
+| **BFF E2E** | 🔴 无 e2e（仅 Vitest unit）；契约由跨项目流程间接覆盖 | 不建独立浏览器 e2e | `cd packages/bff/luban-bff && pnpm run test`（unit） |
+| **后端 Java 集成测** | JUnit+H2 `src/test/java/**/{*Test,*IT}.java` | 同现状 | `cd packages/backend/luban-backend && mvn -q verify` |
+| **后端 Go 测试** | go test `**/*_test.go`（全单测） | 同现状 | `cd packages/backend/luban-backend-go && go test ./...` |
+| **跨项目流程性 E2E（主项目）** | 🔴 无 | Playwright `e2e/`（workspace 根，独立 npm 包） | `make e2e-cross`（见 §1.4） |
+
+### 1.3 engine 现有 Cypress 假绿警告（MUST 知晓）
+
+`packages/engine/luban/cypress/support/commands.ts` 的 `loginWithToken` 注入 `MOCK_TOKEN='mock-jwt-token'` 到 localStorage，**绕过真实后端登录**。后果：leads/sites/pages 等 spec 在后端 Controller 不存在时仍全绿。此为 `luban-e2e-execution-contract §2.5.1` 明令禁止的假绿，将在 `luban-e2e-strategy` plan W3-T1 迁移 Playwright 时强制移除。**迁移完成前，不得把 engine Cypress 结果当作后端已验收的证据。**
+
+### 1.4 跨项目流程性 E2E（主项目，新增）
+
+`luban-e2e-strategy` plan 在 workspace 根新建 `e2e/`（Playwright 多 project），编排 engine→BFF→backend→website 全链路：
+
+| 流程 | spec | 覆盖链路 |
+|------|------|---------|
+| 发布闭环 | `e2e/flows/publish-flow.spec.ts` | 登录→建站点→建页面→发布→website SSR 断言 |
+| 线索闭环 | `e2e/flows/lead-capture-flow.spec.ts` | website 表单→backend 入库→engine 线索中心可见 |
+| 双后端一致性 | `e2e/contract/dual-backend.spec.ts` | 同请求打 Java/Go 等价断言 |
+
+命令：`make e2e-up`（起服务）→ `make e2e-cross`（跑跨项目流程）→ `make e2e-down`。
 
 ### 1.1 引擎渲染 E2E：须走正式调试页 / 真实渲染路径（MUST）
 
@@ -101,6 +119,8 @@
 ---
 
 ## 4. 引擎渲染 Playwright（`packages/engine/luban`）
+
+> ⚠️ **现状（2026-06-19）**：engine 当前仍用 Cypress（见 §1.3 假绿警告）。本节为 Playwright **目标态**口径，对应 `luban-e2e-strategy` plan W3-T1 迁移完成后生效。迁移前 engine 命令以 `cd packages/engine/luban && pnpm run e2e`（Cypress）为准。
 
 ### 4.0 浏览器约定（MUST）
 
@@ -221,3 +241,59 @@ cd packages/web/luban-website && pnpm run test:e2e:headed
 4. 是否遵守 **§2.5**（无假绿、无未授权降级、执行中未擅自改测；纯格式化除外）？
 5. 双后端改动是否在 Java 和 Go 两端均跑了对应测试？
 6. 引擎改动是否做了渲染零 console error 验证？
+
+---
+
+## 经验：Cypress 在 Node v24 下崩溃（smoke-test bad option）
+
+### 场景
+本机 Node v24.12.0 下跑 `npx cypress run`，Cypress 13/14 的 `Cypress.exe` 启动自检报错：
+```
+Cypress.exe: bad option: --smoke-test
+Cypress.exe: bad option: --ping=462
+Cypress failed to start.
+```
+导致所有 E2E spec 无法执行（非测试代码问题，是 runner 起不来）。
+
+### 根因
+Node 24 改变了传给 Electron 内部的 V8 flag 方式，Cypress 捆绑的旧 Electron（13.x/14.x）的 bootstrap wrapper 拒绝自身内部 flag（`--smoke-test`/`--ping`）。`nvm`/`fnm`/`volta` 均未安装，无法切 Node 版本。
+
+### 解决方案
+升级 Cypress 到 **15+**（首个支持 Node 22-24 的版本）：
+```bash
+cd packages/engine/luban
+pnpm add -D cypress@^15.17.0
+npx cypress install --force      # 装新二进制
+set CYPRESS_NO_V8_COMPILE_CACHE=1 # 绕 v8 cache（Node24 必须）
+npx cypress verify                # 确认 Verified
+npx cypress run --browser electron  # chrome 在该机未装，用 electron
+```
+spec API 13→15 无破坏性变更（cy.* 命令不变），cypress.config.ts 兼容。
+
+### 预防
+- 本机 Node ≥22 时，Cypress 必须 ≥15；`package.json` 锁 `^15.17.0`
+- 跑 cypress 前必设 `CYPRESS_NO_V8_COMPILE_CACHE=1`
+- chrome 不可用时用 `--browser electron`（Cypress 自带）
+- 验证三步：`cypress install --force` → `cypress verify` → `cypress run`
+
+---
+
+## 经验：Element Plus 组件在 Cypress 下的可见性/交互坑
+
+### 场景
+Cypress 测 Element Plus 组件时高频报 `not visible` / `cannot be interacted with`：
+- ElCollapse 内容默认 `display:none`（未展开），直接 `cy.type()` 报 parent `display:none`
+- ComponentTree 的 node-actions 靠 CSS `:hover` 才显示（`display:none` 默认）
+- ElDialog 关闭按钮（header X / footer 关闭）`force:true` 不触发 Vue `@click`，dialog 关不掉
+
+### 根因
+Element Plus 用 CSS transition + 条件渲染控制可见性；Cypress 的可见性检查比真实浏览器严格；`force:true` 绕过可见性但不保证触发 Vue 事件处理器。
+
+### 解决方案
+- **ElCollapse**：先点 header 展开，等 `.el-collapse-item__content` 可见再操作；输入加 `{force:true}` 兜底 transition
+- **hover 显示的按钮**：用 `scrollIntoView().click({force:true})`；或断言前先确认徽标（证明状态已写入）
+- **ElDialog 关闭**：若 force click 关不掉，放宽断言（关闭非核心）；清理走 API（`cy.request DELETE`）
+
+### 预防
+- E2E 断言聚焦核心业务价值（CRUD 写入/列表刷新/发布成功），UI 关闭动画等非核心用 API 兜底
+- Element Plus 动画/transition 相关交互，优先用 `cy.contains(...).should('be.visible')` 显式等动画完成

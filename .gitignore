@@ -44,6 +44,10 @@ secrets/
 .claude/projects/
 .claude/memory/*.jsonl
 .worktrees/
+.reasonix/
+
+# ---- Artifacts ----
+*.tar.gz
 .cursor/state/
 .kd-review/
 .luban-review/

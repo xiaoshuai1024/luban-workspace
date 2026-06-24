@@ -1,0 +1,132 @@
+{
+  "featureId": "luban-ai-assistant-plan1",
+  "title": "Luban AI 助手 P1 — 自然语言生成/编辑页面 + 引导 + 模型切换 + 引擎集成",
+  "type": "plan",
+  "createdAt": "2026-06-19",
+  "status": "implemented",
+  "branchStrategy": "ai 子仓 feature/luban-ai-assistant-plan1；engine 子仓 feature/luban-ai-assistant-plan1 同名分支",
+  "parentProgram": "luban-ai-assistant-program",
+  "dependsOnPlan": [],
+  "gateTargets": {
+    "ai": 0.85,
+    "engine": 0.85
+  },
+  "children": [
+    {
+      "id": "P1-T1",
+      "title": "luban-ai-assistant 项目骨架(uv/pyproject/FastAPI app 壳) + Docker Compose 6 容器(fastapi/postgres/milvus/etcd/minio/langfuse) + .env.example + 初始化脚本(建库/建 collection/建 bucket) + deploy/deploy.sh(SSH 部署测试服务器, source 根 .env.dev 注入凭证, 禁硬编码明文)",
+      "wave": 0,
+      "group": "ai",
+      "dependsOn": [],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "docker compose up 全容器健康; init 脚本幂等; postgres/milvus/minio 连接通; 无 GPU 依赖; deploy.sh 不硬编码 SSH 明文(从 .env.dev 注入); .env.dev 已 gitignore 未入仓"
+    },
+    {
+      "id": "P1-T2",
+      "title": "LLM provider 适配层(LangChain ChatZhipuAI/ChatDeepSeek/ChatTongyi 抽象 + 配置切换 MODEL_PROVIDER + structured output + instructor + 流式 stream) 运行期单一不协同",
+      "wave": 0,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T1"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "三家 provider 单测 mock 通过; 切换仅改配置; structured output 产 Pydantic; 单测覆盖≥85%"
+    },
+    {
+      "id": "P1-T3",
+      "title": "Pydantic PageSchema/NodeSchema 模型(对齐 luban-low-code schema.ts) + 校验闸(物料存在性/propsSchema/expression 沙箱规则校验/循环引用/ID 生成) + 失败重试降级",
+      "wave": 1,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T1"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "schema 校验单测覆盖合法/非法用例; expression 沙箱禁 eval/Function/new; 缺物料→占位不崩"
+    },
+    {
+      "id": "P1-T4",
+      "title": "RAG(Milvus collection + 云端 embedding + hybrid 检索 dense+sparse 去 rerank + 物料知识同步脚本: 启动从 luban-ui materialRegistry 导出 name/description/propsSchema 入库)",
+      "wave": 1,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T1"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "物料知识同步幂等可重跑; hybrid 检索单测; 召回 top-k 物料正确; embedding 走云端可配置"
+    },
+    {
+      "id": "P1-T5",
+      "title": "LangGraph agent 状态图(理解意图→RAG检索→生成schema→校验→HITL确认→反馈回环) + PostgreSQL checkpoint(会话可恢复) + memory",
+      "wave": 2,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T2",
+        "P1-T3",
+        "P1-T4"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "状态图单测各节点; checkpoint 持久化可恢复; 回环重试≤N 次; HITL 中断/恢复"
+    },
+    {
+      "id": "P1-T6",
+      "title": "FastAPI 流式端点(SSE/POST /ai/chat + /ai/generate + WebSocket agent 多步) + JWT 鉴权(复用 luban AUTH_JWT_SECRET 自验) + CORS + 健康检查 + 模型配置端点",
+      "wave": 2,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T5"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "SSE 流式单测; JWT 鉴权 401 用例; 无效 token 拒绝; 健康检查端点; 端到端单测覆盖≥85%"
+    },
+    {
+      "id": "P1-T7",
+      "title": "guardrails(输入 prompt injection 检测 + PII 脱敏 + 输出 Pydantic 校验闸) + Langfuse trace 接入(LangGraph/LLM 调用全链路)",
+      "wave": 2,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T5"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "injection 检测用例; PII 脱敏不进日志/Langfuse; trace 上报可见; 输出校验失败兜底"
+    },
+    {
+      "id": "P1-T8",
+      "title": "引擎集成: 画布 API 收口 usePageEditorApi composable(收口 onAddNode/onUpdateProp/onDeleteNode/onDuplicate/history.push 解决 stores/page.ts 与 PageEditor 局部 schema 分裂) + AI 侧边面板(流式渲染+工具调用UI+HITL确认交互+撤销栈集成) + FeatureGate ai_assistant_enabled",
+      "wave": 3,
+      "group": "engine",
+      "dependsOn": [
+        "P1-T6"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "engine pnpm build 零 console error; pnpm test≥85%; AI 改动入撤销栈可撤销; FeatureGate 关闭隐藏面板; PageEditor 现有功能不退化"
+    },
+    {
+      "id": "P1-T9",
+      "title": "AI 对话式引导能力(引导场景 system prompt: 解释画布/物料/属性/下一步建议 + 读当前 schema 给引导) + 引导流集成进 agent",
+      "wave": 3,
+      "group": "ai",
+      "dependsOn": [
+        "P1-T5"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "引导场景单测; 引导建议基于当前 schema; 不编造不存在的物料"
+    },
+    {
+      "id": "P1-T10",
+      "title": "端到端联调 + 集成测试(engine↔ai 服务流式契约) + 部署文档(测试服务器 docker compose up 初始化) + 模型切换验证(GLM/DeepSeek/通义 三家冒烟)",
+      "wave": 3,
+      "group": "cross",
+      "dependsOn": [
+        "P1-T8",
+        "P1-T9"
+      ],
+      "planFile": ".agents/plans/2026-06-19-luban-ai-assistant-plan1.md",
+      "gate": "三家模型冒烟全绿; 流式契约端到端通; 部署文档可复现; 关联 program plan 更新"
+    }
+  ],
+  "implementationStatus": {
+    "code": "done",
+    "unitTests": "green",
+    "e2e": "scripts written, runtime pending"
+  }
+}

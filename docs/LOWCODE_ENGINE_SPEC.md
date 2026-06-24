@@ -334,3 +334,48 @@ schema 引用物料时记录版本：`{ material, version }`
 4. 改动物料是否考虑了版本兼容性？
 5. 改动是否影响多端渲染一致性？
 6. 是否补充了对应的物料测试（默认渲染 + props 边界 + slot + 事件）？
+
+---
+
+## 11. 经验：engine 构建失败排查（monorepo 子仓未初始化 / dist 未构建）
+
+### 场景
+在 engine 子仓（`packages/engine/luban`）执行 `pnpm build` / `vue-tsc` / `vite build` 报错：
+- `Failed to resolve entry for package "luban-low-code"`（或 `luban-base`）
+- `Cannot find module 'luban-low-code'`
+- 引擎源码 import 这些包，但解析不到
+
+### 根因
+engine 通过 `link:` 依赖同 monorepo 的 `packages/ui/luban-ui/packages/luban-low-code`（及 `luban-base`）。三个前提缺一不可：
+1. **ui 子仓未初始化**：worktree/新 clone 里 `packages/ui/luban-ui` 是空目录（submodule 未 init）
+2. **dist 未构建**：`luban-low-code` 的 `package.json` `main` 指向 `./dist/index.js`，但 dist 目录空（需 nx 构建，dev 环境常未构建）
+3. **跨 monorepo 依赖缺失**：`luban-low-code` 源码依赖 `sortablejs` 等，其 `node_modules` 在 luban-ui 侧（未装），engine 侧解析不到
+
+### 解决方案
+**dev/构建场景**：在 `vite.config.ts` 加 alias，把 `luban-low-code`/`luban-base` 别名到源码入口，跨 monorepo 依赖也别名到 engine 本地副本：
+
+```ts
+resolve: {
+  alias: {
+    'luban-low-code': fileURLToPath(
+      new URL('../../../packages/ui/luban-ui/packages/luban-low-code/src/index.ts', import.meta.url)
+    ),
+    'luban-base': fileURLToPath(
+      new URL('../../../packages/ui/luban-ui/packages/luban-base/src/index.ts', import.meta.url)
+    ),
+    // 源码依赖的第三方，别名到 engine 本地 node_modules 副本
+    sortablejs: fileURLToPath(new URL('./node_modules/sortablejs/modular/sortable.esm.js', import.meta.url)),
+  },
+},
+```
+
+前置：①`git submodule update --init packages/ui/luban-ui` ②`pnpm add sortablejs`（补 engine 侧缺失依赖）
+
+**typecheck 注意**：`vue-tsc --noEmit` 可能仍报 `Cannot find module 'luban-low-code'`（vue-tsc 不读 vite alias）。这是已知解析限制，以 `vite build` 实际是否通过为准；`PropertyPanel.vue` 等现有文件同样报错，属既有问题，非新引入。
+
+### 预防
+- 新 worktree / 新 clone engine 子仓前，先 `git submodule update --init --recursive`（含 ui）
+- engine 的 `vite.config.ts` 应默认带 `luban-low-code`/`luban-base` 的源码 alias（dev 友好），而非依赖 dist 构建
+- CI 用 nx 构建 dist；本地 dev 用 alias 直读源码，两条路径并存
+- 判断"是否我的改动引入"：对照现有文件（如 PropertyPanel.vue）是否同样报 `Cannot find module`——若同样报，是既有解析问题，非回归
+

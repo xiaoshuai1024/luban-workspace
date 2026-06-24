@@ -12,6 +12,18 @@
 |------|------|
 | [debugging-protocol.md](./debugging-protocol.md) | 测试失败排查顺序：Console → 后端日志 → curl → 根因；禁止改测试让测试通过；含 Spring Boot 路由冲突经验 |
 
+## Git / 工作流
+
+| 文档 | 用途 |
+|------|------|
+| [luban-git-merge-pull.md](./luban-git-merge-pull.md) | submodule 多仓协作：squash 合并后指针稳定性、PR 合并顺序、feature 分支注册新 submodule |
+
+## 通用经验
+
+| 文档 | 用途 |
+|------|------|
+| [luban-experience-lessons.md](./luban-experience-lessons.md) | 跨主题通用兜底：Windows cmd/CRLF 下 python -c 补丁失效、ruff noqa 残留与 B008 误报 |
+
 ## 安全
 
 | 文档 | 用途 |
