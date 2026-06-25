@@ -37,7 +37,7 @@
 
 | ID | 状态 | 优先级 | 迭代 | 模块 | 标题 |
 |----|------|--------|------|------|------|
-| T-001 | pending | medium | 未排期 | luban-ui | 评估 monorepo 管理工具：nx → 替代方案 |
+| T-001 | pending | high | 未排期 | luban-ui | 前端 monorepo 选型合理性论证 + 是否更换 nx（Turborepo/pnpm 原生/裸 scripts 候选矩阵） |
 | T-002 | pending | high | 未排期 | client | 初始化 Flutter 客户端子仓（packages/client/luban-flutter） |
 | T-003 | pending | high | 未排期 | client | 初始化 Electron 客户端子仓（packages/client/luban-electron） |
 | T-004 | pending | high | 未排期 | luban-bff | 补齐 BFF 测试（当前零测试文件，违反测试门禁） |
@@ -45,6 +45,7 @@
 | T-006 | pending | medium | 未排期 | workspace | meta 仓 + 子仓 CI 补齐（meta 无 .github/workflows） |
 | T-007 | pending | medium | 未排期 | backend-go | Go 后端修复 detached HEAD + 补测试 + 补 CI（v02 开 issue 追赶 v01+v02 parity） |
 | T-008 | pending | low | 未排期 | workspace | docker-compose 端口暴露面核查（6 服务全开 ports） |
+| T-009 | pending | high | 未排期 | workspace | 前端架构守护 + lint 配置检查（eslint/stylelint/导入边界/commitlint/CI 拦截） |
 | P-001 | pending | high | v02 | product | 计费/订阅/支付闭环（billing/payment 当前 0 实现）— v02 做商业化骨架（三档 Plan 价格全 0 + 逻辑完整），支付后置 |
 | P-002 | pending | high | 未排期 | product | 自定义域名 + CDN（cname/cdn 当前 0 实现，企业客户硬门槛） |
 | P-003 | pending | high | v02 | product | 转化分析/归因/A·B 测试（analytics/tracking 当前 0 实现，此类产品卖点） |
@@ -60,11 +61,16 @@
 
 ## 详情
 
-### T-001 评估 monorepo 管理工具：nx → 替代方案
+### T-001 前端 monorepo 选型合理性论证 + 是否更换 nx
 
 - **状态**：pending（占位，候选方案待后续调研）
+- **优先级提升理由**：前端工具链是各端（engine/bff/ui/website）共享地基，选型失误会牵连多仓迁移成本；需尽早论证当前 nx 是否仍是合理选择。
 - **影响仓**：子仓 `packages/ui/luban-ui`（git submodule `xiaoshuai1024/luban-ui`，分支 `master`）
 - **背景**：`nx` 仅用于 `luban-ui` 子仓（**非** 整个 workspace；meta 仓本身是 git submodule 聚合，无 nx）。luban-ui 内部是 pnpm workspace（`apps/*` + `packages/*`，共 5 个子包），nx 通过插件推导项目，**无 `project.json`**，配置集中在以下文件。
+- **核心问题（选型合理性）**：
+  - nx 在 luban-ui 当前规模（5 子包）下的收益（缓存/编排/远程缓存）是否匹配其复杂度与迁移锁定成本？
+  - Nx Cloud 远程缓存是否被实际使用？若不用，nx 的增量价值是否大幅缩水？
+  - pnpm workspace 原生能力（`-r`/`--filter`）+ Turborepo 能否以更低成本覆盖现有用到的 nx 能力？
 
 #### 相关文件路径（精确落点）
 
@@ -190,6 +196,27 @@
   - [ ] 数据库/中间件默认仅内部网络可达
 - **验收标准**：生产 compose 配置下 mysql/redis/backend 不对外暴露端口。
 - **备注**：dev 环境全暴露可接受，优先级 low；上生产前必须处理。
+
+---
+
+### T-009 前端架构守护 + lint 配置检查
+
+- **状态**：pending
+- **影响仓**：meta 仓治理 + 各前端子仓（`packages/engine/luban`、`packages/bff/luban-bff`、`packages/ui/luban-ui`、`packages/web/luban-website`）
+- **背景**：当前各前端子仓 lint 配置分散且强度不明（engine/bff/website 的 eslint flat config、ui 的 `@nx/eslint-plugin`）；无统一的架构守护规则（包间导入边界、禁用 `any`、禁止 `console` 等），也无 commit message / CI 拦截。低代码引擎门禁要求「零新增 console error」（见 `AGENTS.md` + `.agents/rules/luban-lowcode-engine-quality.md`），但缺乏自动化校验。随着 v02 多端（website 埋点 / engine 报表）并行开发，无架构守护会让各仓代码风格与依赖方向快速漂移。
+- **待办**：
+  - [ ] **盘点现状**：逐仓核对 `eslint.config.{js,mjs,ts}` / `tsconfig.json` / 是否有 `.stylelintrc` / 是否有 `commitlint` / husky/lint-staged 钩子；列出每仓规则强度差异
+  - [ ] **前端架构守护规则**（统一）：
+    - [ ] 禁用 `console.*`（引擎仓与渲染链路硬门禁，对齐 `luban-lowcode-engine-quality.md`）
+    - [ ] 禁用 `any`（或强制 `eslint-disable` 显式标注）
+    - [ ] 包间导入边界：禁止 engine→website、ui→engine 等反向依赖（用 `no-restricted-imports` / `eslint-plugin-import` / `dependency-cruiser`）
+    - [ ] 物料 props schema 合规校验（对齐 `.agents/rules/luban-material-schema.md`）
+  - [ ] **stylelint**：统一 CSS/SCSS/Vue `<style>` 规则（若有样式）
+  - [ ] **commitlint**：统一 commit message 规范（conventional commits，对齐现有 commit 风格 `feat/fix/chore(scope): ...`）
+  - [ ] **CI 拦截**：lint 纳入 CI（与 T-006 CI 补齐联动），PR 不绿不准合
+  - [ ] **husky/lint-staged**：本地 pre-commit 钩子（可选，降低 CI 反馈延迟）
+- **验收标准**：各前端子仓有统一的 eslint 规则集（含架构守护 + 零 console + 禁 any + 导入边界）；lint 纳入 CI；新增违规在 PR 阶段被拦截。
+- **与 T-001/T-006 的关系**：若 T-001 结论是更换 nx，eslint 配置需同步迁移；CI 拦截依赖 T-006（meta 仓 + 子仓 CI 补齐）落地。建议三者排进同一迭代推进。
 
 ---
 
