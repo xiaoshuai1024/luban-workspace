@@ -120,7 +120,14 @@ run_one() {
     java/build)   cmd="mvn -q -DskipTests package"; primary_tool="mvn" ;;
     java/install) cmd="mvn -q -DskipTests dependency:resolve"; primary_tool="mvn" ;;
     go/test)      cmd="go test ./..."; primary_tool="go" ;;
-    go/lint)      cmd="go vet ./..."; primary_tool="go" ;;
+    go/lint)
+      # 优先用 golangci-lint（配置在 .golangci.yml）；未安装则降级 go vet
+      if command -v golangci-lint >/dev/null 2>&1; then
+        cmd="golangci-lint run ./..."
+      else
+        cmd="go vet ./..."
+      fi
+      primary_tool="go" ;;
     go/build)     cmd="go build ./..."; primary_tool="go" ;;
     go/install)   cmd="go mod download"; primary_tool="go" ;;
   esac
