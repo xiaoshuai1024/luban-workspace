@@ -1,0 +1,137 @@
+# =====================================================================
+# luban — one-click local stack (docker-compose / Compose spec)
+# Usage:  cp .env.example .env  &&  docker compose up --build
+# =====================================================================
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: luban-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-luban_root_dev}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-luban}
+      MYSQL_USER: ${MYSQL_USER:-luban}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-luban_dev_pass}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: luban-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  backend:
+    build:
+      context: packages/backend/luban-backend
+      dockerfile: Dockerfile
+    image: luban-backend:dev
+    container_name: luban-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_PORT: "8080"
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DB: ${MYSQL_DB:-luban}
+      MYSQL_USER: ${MYSQL_USER:-luban}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-luban_dev_pass}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      LEAD_ENC_KEY: ${LEAD_ENC_KEY}
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/backend/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  bff:
+    build:
+      context: packages/bff/luban-bff
+      dockerfile: Dockerfile
+    image: luban-bff:dev
+    container_name: luban-bff
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      BACKEND_BASE_URL: http://backend:8080/backend
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  engine:
+    # build context = workspace root, so vite.config.ts alias to packages/ui/luban-ui resolves.
+    build:
+      context: .
+      dockerfile: packages/engine/luban/Dockerfile
+    image: luban-engine:dev
+    container_name: luban-engine
+    restart: unless-stopped
+    depends_on:
+      bff:
+        condition: service_started
+    environment:
+      VITE_API_BASE_URL: /api
+    ports:
+      # engine nginx serves on container port 4200 (see packages/engine/luban/Dockerfile)
+      - "5173:4200"
+
+  website:
+    build:
+      context: packages/web/luban-website
+      dockerfile: Dockerfile
+    image: luban-website:dev
+    container_name: luban-website
+    restart: unless-stopped
+    depends_on:
+      bff:
+        condition: service_started
+    environment:
+      NUXT_PUBLIC_BFF_BASE_URL: http://localhost:3000
+      NUXT_PUBLIC_DEFAULT_SITE_SLUG: default
+      NODE_ENV: production
+    ports:
+      - "3001:4173"
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  default:
+    name: luban-net

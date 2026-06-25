@@ -1,0 +1,612 @@
+{
+  "featureId": "platform-complete-v1",
+  "title": "luban 低代码平台完整可交付版（设计器+物料库+留资闭环+实时协作）",
+  "planPath": "docs/superpowers/plans/2026-06-15-platform-complete-v1.md",
+  "notes": "schema 对齐 docs/dev/ssot-task-graph.md（subsystem + group + pending/in_progress/completed/blocked）。校验脚本 scripts/verify-plan-ssot.mjs 为 stub，JSON 合规性人工保证。Go 后端本轮不实现（用户确认仅 Java），文档标注差异。CRDT 协作服务承载于 BFF（Yjs + y-websocket）。wave/group 语义：group(W1-W5) 为 SSOT 并行组标识，wave 为同义人类可读波次，二者须一致（已逐条核对）。同 wave 内存在串行依赖（如 T-ui-12→T-ui-13/T-eng-2/T-web-1、T-bff-1→T-bff-2），仅 wave 顶部子集可并行，详见 plan §9.6 派发计划；执行时以 dependsOn 为准而非 group 批量并行。M1-M5 里程碑与 6 条风险见 plan §9b。",
+  "decisions": {
+    "designer": "完整档：拖拽+属性面板+大纲树+撤销重做+快捷键+多设备预览+历史版本+右键菜单+对齐辅助线",
+    "collab": "Yjs CRDT（乐观并发，无页面锁），服务端并入 BFF WebSocket",
+    "poster": "流式布局承载（全屏固定宽度容器+导出图片），不引入绝对定位双模式内核",
+    "backend": "仅 Java；Go 延后并文档标注",
+    "materialScope": "营销+留资+网站搭建+海报四族，约 35 个新物料"
+  },
+  "tasks": [
+    {
+      "id": "T-be-1",
+      "subsystem": "backend-java",
+      "group": "W1",
+      "wave": 1,
+      "title": "LeadStatusMachine 补全 ASSIGNED→LOST / CONTACTING→INVALID 转移 + 单测",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-2",
+      "subsystem": "backend-java",
+      "group": "W1",
+      "wave": 1,
+      "title": "LeadService/FormService 加 @Transactional + LeadService.list 校验 siteId 存在",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-3",
+      "subsystem": "backend-java",
+      "group": "W2",
+      "wave": 2,
+      "title": "LeadController/LeadMapper 增 keyword 搜索（解密 contact LIKE）",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-4",
+      "subsystem": "backend-java",
+      "group": "W2",
+      "wave": 2,
+      "title": "DedupService 实现 OVERWRITE/MERGE 策略 + LeadService 接 captcha 校验",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-5",
+      "subsystem": "backend-java",
+      "group": "W2",
+      "wave": 2,
+      "title": "LeadController GET /leads/:id/contact 解密查看（审计日志）",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-6",
+      "subsystem": "backend-java",
+      "group": "W1",
+      "wave": 1,
+      "title": "page_versions 表 + PageVersion 领域 + PageVersionService/Controller（list/get/rollback）",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-7",
+      "subsystem": "backend-java",
+      "group": "W2",
+      "wave": 2,
+      "title": "FeatureGate 配置实体 + FeatureGateService（开关读取）+ lead_capture/collab 关联",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-8",
+      "subsystem": "backend-java",
+      "group": "W3",
+      "wave": 3,
+      "title": "安全加固：LEAD_ENC_KEY 强制 env（无默认）+ GlobalExceptionHandler 500 脱敏 + AuthFilter 收窄",
+      "dependsOn": [
+        "T-be-4"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-be-9",
+      "subsystem": "backend-java",
+      "group": "W3",
+      "wave": 3,
+      "title": "控制器集成测试（@WebMvcTest）+ 导出测试",
+      "dependsOn": [
+        "T-be-3",
+        "T-be-4",
+        "T-be-6"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-1",
+      "subsystem": "ui",
+      "group": "W1",
+      "wave": 1,
+      "title": "属性面板组件 PropertyPanel（消费 propSchema 动态生成编辑器）",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-2",
+      "subsystem": "ui",
+      "group": "W1",
+      "wave": 1,
+      "title": "撤销/重做引擎 useHistory（schema 快照栈 + patch）",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-3",
+      "subsystem": "ui",
+      "group": "W1",
+      "wave": 1,
+      "title": "校验引擎增强：全表单提交校验 validateAll + formState 自动初始化",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-4",
+      "subsystem": "ui",
+      "group": "W1",
+      "wave": 1,
+      "title": "LubanForm propSchema 补全（formId/submitConfig/dedupKeys/antiSpam/status）",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-5",
+      "subsystem": "ui",
+      "group": "W1",
+      "wave": 1,
+      "title": "Checkbox/RadioGroup/Switch 增 error/errorMessage props + 样式",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-6",
+      "subsystem": "ui",
+      "group": "W1",
+      "wave": 1,
+      "title": "大纲树组件 OutlineTree（schema 树形导航 + 选中/删除/复制/拖拽排序）",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-7",
+      "subsystem": "ui",
+      "group": "W2",
+      "wave": 2,
+      "title": "营销物料族：倒计时/优惠券卡/弹窗/轮播图/导航栏/页脚（6 个）",
+      "dependsOn": [
+        "T-ui-4"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-8",
+      "subsystem": "ui",
+      "group": "W2",
+      "wave": 2,
+      "title": "网站搭建物料族：图片/标题/链接/卡片/分隔线/图标/列表/富文本/视频/标签页/折叠面板（11 个）",
+      "dependsOn": [
+        "T-ui-4"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-9",
+      "subsystem": "ui",
+      "group": "W2",
+      "wave": 2,
+      "title": "留资物料族：手机格式化输入/省市联动/日期选择/文件上传/评分/滑块（6 个）",
+      "dependsOn": [
+        "T-ui-4",
+        "T-ui-5"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-10",
+      "subsystem": "ui",
+      "group": "W2",
+      "wave": 2,
+      "title": "海报物料族：海报容器（固定尺寸）/海报文本/海报图片/形状/二维码（5 个）+ 导出图片能力",
+      "dependsOn": [
+        "T-ui-4"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-11",
+      "subsystem": "ui",
+      "group": "W2",
+      "wave": 2,
+      "title": "表单物料补全：日期范围/时间选择/标签输入（3 个）",
+      "dependsOn": [
+        "T-ui-4",
+        "T-ui-5"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-12",
+      "subsystem": "ui",
+      "group": "W3",
+      "wave": 3,
+      "title": "全量物料 registry/palette/componentMeta 注册 + 导出",
+      "dependsOn": [
+        "T-ui-7",
+        "T-ui-8",
+        "T-ui-9",
+        "T-ui-10",
+        "T-ui-11"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-ui-13",
+      "subsystem": "ui",
+      "group": "W3",
+      "wave": 3,
+      "title": "全部新物料单测 + story（每物料一个 spec + story）",
+      "dependsOn": [
+        "T-ui-12"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-eng-1",
+      "subsystem": "engine",
+      "group": "W2",
+      "wave": 2,
+      "title": "PageEditor 启用 designMode + 接 select/add-node/reorder + schema 操作工具",
+      "dependsOn": [
+        "T-ui-1",
+        "T-ui-2"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-eng-2",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "设计器左栏：组件面板（消费 getPaletteGroups，分组+搜索）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-ui-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-3",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "设计器右栏：属性面板集成（消费 getComponentMeta + PropertyPanel）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-ui-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-4",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "设计器大纲树集成（OutlineTree + schema 双向同步）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-ui-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-5",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "设计器工具栏：撤销/重做/预览/发布/多设备切换(PC/H5)/右键菜单/对齐辅助线",
+      "dependsOn": [
+        "T-eng-1",
+        "T-ui-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-6",
+      "subsystem": "engine",
+      "group": "W4",
+      "wave": 4,
+      "title": "键盘快捷键（Delete/Ctrl+Z/Y/Ctrl+C/V + 节点导航）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-ui-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-7",
+      "subsystem": "engine",
+      "group": "W4",
+      "wave": 4,
+      "title": "协作集成：在线用户列表 + 远程光标 + CRDT 接入（消费 BFF WebSocket）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-bff-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-8",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "历史版本 UI（版本列表/查看/回滚，消费 PageVersion API）",
+      "dependsOn": [
+        "T-bff-3",
+        "T-be-6"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-eng-9",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "FormList + FormEditor 页面（留资表单 CRUD + 路由 + 菜单）",
+      "dependsOn": [
+        "T-ui-4"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-eng-10",
+      "subsystem": "engine",
+      "group": "W3",
+      "wave": 3,
+      "title": "LeadList/LeadDetail 补齐：空态/错态/assignee 分配/keyword（消费 T-be-3/T-be-5）",
+      "dependsOn": [
+        "T-be-3",
+        "T-be-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-eng-11",
+      "subsystem": "engine",
+      "group": "W1",
+      "wave": 1,
+      "title": "菜单 active-highlight 修复 + 线索中心首次无站点引导",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-bff-1",
+      "subsystem": "bff",
+      "group": "W3",
+      "wave": 3,
+      "title": "WebSocket 协作服务：y-websocket 集成 + 房间管理（按 siteId/pageId）",
+      "dependsOn": [
+        "T-be-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-bff-2",
+      "subsystem": "bff",
+      "group": "W3",
+      "wave": 3,
+      "title": "协作鉴权：JWT 校验 + 房间权限（siteId 归属）+ 在线状态广播",
+      "dependsOn": [
+        "T-bff-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-bff-3",
+      "subsystem": "bff",
+      "group": "W2",
+      "wave": 2,
+      "title": "页面版本 API 路由（list/get/rollback 代理后端）",
+      "dependsOn": [
+        "T-be-6"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-bff-4",
+      "subsystem": "bff",
+      "group": "W1",
+      "wave": 1,
+      "title": "keyword 透传 + X-Site-ID 注入 + export 过滤参数 + dead code 清理",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-bff-5",
+      "subsystem": "bff",
+      "group": "W4",
+      "wave": 4,
+      "title": "BFF 测试框架（vitest）+ lib 单测（apiHandler/authToken/backendClient）",
+      "dependsOn": [
+        "T-bff-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-bff-6",
+      "subsystem": "bff",
+      "group": "W4",
+      "wave": 4,
+      "title": "BFF API route 集成测试 + 协作 WebSocket 测试",
+      "dependsOn": [
+        "T-bff-1",
+        "T-bff-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-web-1",
+      "subsystem": "web",
+      "group": "W3",
+      "wave": 3,
+      "title": "渲染全部新物料（palette 全覆盖 + 海报容器 SSR）",
+      "dependsOn": [
+        "T-ui-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-web-2",
+      "subsystem": "web",
+      "group": "W3",
+      "wave": 3,
+      "title": "留资提交全量校验 + UTM/channelId/pageId 透传 + contact 值强制 string 化",
+      "dependsOn": [
+        "T-web-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-web-3",
+      "subsystem": "web",
+      "group": "W4",
+      "wave": 4,
+      "title": "useHead 响应式 + 海报页路由 + 导出图片客户端能力",
+      "dependsOn": [
+        "T-web-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-web-4",
+      "subsystem": "web",
+      "group": "W4",
+      "wave": 4,
+      "title": "Website 测试框架（vitest）+ useLeadSubmit/usePageByPath 单测",
+      "dependsOn": [
+        "T-web-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-cross-1",
+      "subsystem": "cross",
+      "group": "W1",
+      "wave": 1,
+      "title": "docker-compose（mysql8+redis+backend+bff+engine+website）一键启动",
+      "dependsOn": [],
+      "status": "completed"
+    },
+    {
+      "id": "T-cross-2",
+      "subsystem": "cross",
+      "group": "W2",
+      "wave": 2,
+      "title": "FeatureGate 统一前端消费（engine/website 读开关）+ 默认值配置",
+      "dependsOn": [
+        "T-be-7"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "T-cross-3",
+      "subsystem": "cross",
+      "group": "W5",
+      "wave": 5,
+      "title": "E2E 全量：设计器搭建/属性编辑/撤销重做/协作/留资提交/线索管理/版本回滚",
+      "dependsOn": [
+        "T-eng-8",
+        "T-eng-7",
+        "T-eng-9",
+        "T-web-2",
+        "T-bff-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "T-cross-4",
+      "subsystem": "cross",
+      "group": "W5",
+      "wave": 5,
+      "title": "API.md + 物料文档 + README 更新（含 Go 延后声明、协作架构）",
+      "dependsOn": [
+        "T-be-9",
+        "T-ui-13"
+      ],
+      "status": "pending"
+    }
+  ],
+  "waves": {
+    "W1": {
+      "label": "契约源头与内核基础（并行）",
+      "tasks": [
+        "T-be-1",
+        "T-be-2",
+        "T-be-6",
+        "T-ui-1",
+        "T-ui-2",
+        "T-ui-3",
+        "T-ui-4",
+        "T-ui-5",
+        "T-ui-6",
+        "T-bff-4",
+        "T-eng-11",
+        "T-cross-1"
+      ]
+    },
+    "W2": {
+      "label": "后端服务+物料批量+设计器接线（并行）",
+      "tasks": [
+        "T-be-3",
+        "T-be-4",
+        "T-be-5",
+        "T-be-7",
+        "T-ui-7",
+        "T-ui-8",
+        "T-ui-9",
+        "T-ui-10",
+        "T-ui-11",
+        "T-eng-1",
+        "T-bff-3",
+        "T-cross-2"
+      ]
+    },
+    "W3": {
+      "label": "集成层：面板/管理页/协作/渲染/版本UI（并行，内部有串行依赖见 notes）",
+      "tasks": [
+        "T-be-8",
+        "T-be-9",
+        "T-ui-12",
+        "T-ui-13",
+        "T-eng-2",
+        "T-eng-3",
+        "T-eng-4",
+        "T-eng-5",
+        "T-eng-8",
+        "T-eng-9",
+        "T-eng-10",
+        "T-bff-1",
+        "T-bff-2",
+        "T-web-1",
+        "T-web-2"
+      ]
+    },
+    "W4": {
+      "label": "高级能力+测试地基（并行）",
+      "tasks": [
+        "T-eng-6",
+        "T-eng-7",
+        "T-bff-5",
+        "T-bff-6",
+        "T-web-3",
+        "T-web-4"
+      ]
+    },
+    "W5": {
+      "label": "验收收口",
+      "tasks": [
+        "T-cross-3",
+        "T-cross-4"
+      ]
+    }
+  },
+  "coverageTargets": {
+    "backend-java": "80%",
+    "backend-go": "N/A (本期延后)",
+    "engine": "85%",
+    "bff": "85%",
+    "web": "85%",
+    "ui": "90%",
+    "client": "N/A (规划态)"
+  }
+}
