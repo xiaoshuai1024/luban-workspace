@@ -18,10 +18,6 @@
 	path = packages/backend/luban-backend
 	url = https://github.com/xiaoshuai1024/luban-backend.git
 	branch = master
-[submodule "packages/backend/luban-backend-go"]
-	path = packages/backend/luban-backend-go
-	url = https://github.com/xiaoshuai1024/luban-backend-go.git
-	branch = master
 [submodule "packages/docs/luban-architecture-design"]
 	path = packages/docs/luban-architecture-design
 	url = https://github.com/xiaoshuai1024/luban-architecture-design.git
