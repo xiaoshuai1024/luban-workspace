@@ -1,0 +1,46 @@
+{
+  "featureId": "production-readiness-program",
+  "title": "生产就绪质量提升项目集（覆盖率 + 致命修复 + 单测 80% + E2E 70% + 架构守护）",
+  "createdAt": "2026-06-26",
+  "status": "draft",
+  "childPlans": [
+    "2026-06-26-coverage-tooling",
+    "2026-06-26-critical-fixes",
+    "2026-06-26-unit-test-80pct",
+    "2026-06-26-e2e-70pct",
+    "2026-06-26-arch-guard-tests"
+  ],
+  "waves": [
+    {
+      "wave": 1,
+      "plan": "2026-06-26-coverage-tooling",
+      "goal": "所有模块覆盖率工具配置完成 + 阈值植入（Java JaCoCo argLine 修复 + check 规则；前端 vitest coverage-v8 + thresholds）",
+      "blocking": true
+    },
+    {
+      "wave": 2,
+      "plan": "2026-06-26-critical-fixes",
+      "goal": "15 项致命问题修复（Java 事务/架构/校验；Engine 路由守卫/状态持久化/mock；BFF CORS/限流/JWT；Website SSR/404；UI ErrorBoundary）",
+      "blocking": true,
+      "dependsOn": [1]
+    },
+    {
+      "wave": 3,
+      "plan": "2026-06-26-unit-test-80pct",
+      "goal": "所有模块单测覆盖率提升到 80% line（Java 补 service/controller 测试；Engine 补 view/store/api 测试；BFF 补路由测试；Website 补 composable 测试；UI 补物料测试）",
+      "dependsOn": [1, 2]
+    },
+    {
+      "wave": 4,
+      "plan": "2026-06-26-e2e-70pct",
+      "goal": "E2E 覆盖率提升到 70%（合并 designer-polish E2E；真实登录替换 mock token；UI CRUD 流程；发布/下线 UI 测试；用户管理；设置保存）",
+      "dependsOn": [2, 3]
+    },
+    {
+      "wave": 5,
+      "plan": "2026-06-26-arch-guard-tests",
+      "goal": "架构守护测试完善（Java ArchUnit 覆盖所有 controller @Valid；Go 端对称规则；前端 eslint-plugin-boundaries CI 强制；dependency-cruiser 致命违规阻断）",
+      "dependsOn": [2, 3]
+    }
+  ]
+}
