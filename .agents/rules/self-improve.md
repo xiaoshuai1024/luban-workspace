@@ -168,3 +168,93 @@ content = open('file.ts', 'rb').read().decode('latin-1').encode('latin-1').decod
 - 未完成必要步骤时仅拦当前请求，不销毁 session
 - 终态拒绝时才清 session
 - 拦截器销毁 session 前确认用户没有挽回余地
+
+---
+
+## 经验：Nx 22.5 boundaries tags 不生效（apps/ 需要 project.json）
+
+### 场景
+收紧 `@nx/enforce-module-boundaries` 从 `*→*` 到真实 tag 规则后，`apps/luban-ui` 持续报 "A project without tags used in dependencies"，即使 package.json 已加 `"tags": ["type:app"]`。
+
+### 根因
+Nx 22.5.4 对 **不在 pnpm-workspace.yaml packages 列表中** 的项目（如 `apps/` 目录），不从 package.json 的 `tags` 字段读取 tags。需要：
+1. 在包目录创建 `project.json`，显式声明 `tags`
+2. 执行 `npx nx reset` + 重建 ProjectGraph（`npx nx graph --file .nx/graph.json`）
+
+### 解决方案
+```json
+// apps/luban-ui/project.json
+{
+  "name": "@luban-ui/luban-ui",
+  "projectType": "application",
+  "sourceRoot": "apps/luban-ui/src",
+  "tags": ["type:app"],
+  "targets": {}
+}
+```
+```bash
+# 重建 ProjectGraph（Nx 缓存会导致旧 tags 残留）
+npx nx reset
+npx nx show projects  # 触发 graph 构建
+npx nx run-many --target=lint --all  # 验证 boundaries 生效
+```
+
+### 预防
+- Nx 项目 tags **优先放 project.json**（最可靠），package.json tags 作为备用
+- 改 tags 后必须 `nx reset` + 重建 graph，否则 ESLint 用旧缓存
+- 用 `npx nx graph --file .nx/graph.json` + python 脚本验证 tags 是否注入
+
+---
+
+## 经验：go-cleanarch 库不活跃，用标准库 ast 手写分层测试
+
+### 场景
+计划用 `github.com/roblaszczak/go-cleanarch` 做 Go 分层架构测试，发现库维护不活跃、API 复杂、文档少。
+
+### 根因
+go-cleanarch 最后更新较早，star 数少，且 API 设计偏重 rule set 而非简单的包级 import 检查。
+
+### 解决方案
+用 Go 标准库 `go/parser` + `go/token` 手写分层测试，零外部依赖：
+```go
+// internal/lint/architecture_test.go
+func Test_NoReverseLayerDependencies(t *testing.T) {
+    // 1. 用 parser.ParseFile 解析每个 .go 文件的 import
+    // 2. 用 resolveLayer() 判断 import 属于哪个层
+    // 3. 用 allowedDeps map 检查方向是否合法
+    // 4. 白名单例外（如 error.go 跨层 error mapping）
+}
+```
+
+### 预防
+- Go 架构测试优先用标准库 ast，不引入不活跃的外部库
+- 分层规则用 `map[string][]string`（source → allowed targets）表达，清晰可维护
+- 已知跨层依赖用白名单 map 显式声明（如 error mapping），不要放宽全局规则
+
+---
+
+## 经验：子模块合并冲突策略（保留远端功能 + 叠加工具配置）
+
+### 场景
+架构治理配置提交到各子模块 dev 分支时，远端 dev 已有新提交（功能改进），merge 冲突涉及：
+- Java pom.xml（远端加了 H2/failsafe，我们加了 ArchUnit）
+- BFF route.ts（远端改了鉴权逻辑，我们改了 params async）
+- Website package.json（远端加了测试脚本，我们加了 lint 配置）
+
+### 根因
+子模块 dev 分支并行开发，功能提交与工具配置提交在同一文件上冲突。
+
+### 解决方案
+```bash
+# 策略：保留远端功能改进（theirs），手动叠加本次工具配置
+git checkout --theirs <conflicted-file>  # 取远端版本
+# 手动编辑：在远端基础上加回本次的 lint 配置
+git add <conflicted-file>
+git commit -m "merge: resolve conflict (keep remote feature + add lint tooling)"
+```
+
+### 预防
+- 冲突时**先看远端改了什么**（`git diff HEAD...MERGE_HEAD <file>`），不要无脑 ours/theirs
+- 功能代码（鉴权、业务逻辑）优先保留远端
+- 配置代码（lint、CI、依赖）在远端基础上叠加
+- merge 后必须跑 build + test 验证（`mvn compile` / `pnpm build`），不能假设合并正确

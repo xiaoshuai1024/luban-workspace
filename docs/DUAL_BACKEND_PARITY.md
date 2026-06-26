@@ -374,3 +374,45 @@ Java 端：实体 `String`（存 JSON 字符串），DTO `JsonNode`/`ObjectNode`
 - Go 任何 repo 查询 **必须** 显式列名列常量，**禁止** `SELECT *`（加列即错位）
 - 双端字段名（JSON tag）**必须** 一致（如 `fieldSchema` 两端同名）
 - contract test 覆盖 JSON 列往返（存对象→取对象，断言非 base64 字符串）
+
+---
+
+## 经验：ArchUnit + Go ast 对称守护双后端契约
+
+### 场景
+双后端契约（分页响应体、错误体、API 路径前缀）此前仅靠人工对照文档，无自动化守护。引入架构测试后，Java 用 ArchUnit、Go 用手写 ast 测试，实现对称契约守护。
+
+### 根因
+Java 和 Go 两端代码结构不同（Java 有 Spring 注解 + ArchUnit，Go 是普通函数 + ast 解析），但分层规则和契约要求相同。需要两套工具做同一件事。
+
+### 解决方案
+
+**Java 端**（ArchUnit `DualBackendContractTest`）：
+```java
+@ArchTest
+static final ArchRule apierror_should_have_code_and_message =
+    classes().that().haveSimpleName("APIError")
+        .should().resideInAPackage("..exception..")
+        .because("APIError 作为统一错误体必须位于 exception 包，与 Go 端对称");
+
+@ArchTest
+static final ArchRule list_response_dtos_should_exist =
+    classes().that().haveSimpleNameEndingWith("ListResponse")
+        .should().resideInAPackage("..dto..")
+        .because("列表响应 DTO 必须承载 items/total 分页字段（与 Go 端对称）");
+```
+
+**Go 端**（`internal/lint/architecture_test.go`）：
+```go
+var allowedDeps = map[string][]string{
+    "handler":    {"service", "model"},        // 与 Java controller→service 对称
+    "service":    {"repository", "model"},     // 与 Java service→mapper 对称
+    "repository": {"model"},                   // 与 Java mapper→entity 对称
+}
+```
+
+### 预防
+- 双后端契约测试**必须两端对称**：Java 加 ArchUnit 规则，Go 加对应 ast 检查
+- 契约差异（如 Java `APIError.details` vs Go 无 requestId）应标记为已知缺口，单独 task 跟进
+- 分层方向两端一致：controller/handler → service → mapper/repository
+- 已知跨层依赖（如 Go `handler/error.go` 引用 repository sentinel）用白名单显式声明，不放宽全局规则
