@@ -21,12 +21,26 @@
       "Bash(mvn *)",
       "Bash(go test*)",
       "Bash(go build*)",
-      "Bash(node scripts/*.mjs *)"
+      "Bash(node scripts/*.mjs *)",
+      "Bash(node scripts/session/*.mjs)"
     ],
     "deny": [
       "Bash(git push * master*)",
       "Bash(git push * main*)",
       "Bash(rm -rf packages/*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/session/in-progress-summary.mjs"
+          }
+        ]
+      }
     ]
   }
 }

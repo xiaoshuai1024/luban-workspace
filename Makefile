@@ -13,18 +13,18 @@
 
 BRANCH ?= main
 PKG_DIRS := packages/engine/luban packages/bff/luban-bff packages/ui/luban-ui packages/web/luban-website \
-            packages/backend/luban-backend packages/backend/luban-backend-go
+            packages/backend/luban-backend
 
 .PHONY: clone-all pull-all push-all pr-all sync-submodules \
-        test test-coverage lint \
-        dev-engine dev-bff dev-website dev-java dev-go dev-apps dev-check \
+        test test-coverage journey-coverage lint \
+        dev-engine dev-bff dev-website dev-java dev-apps dev-check \
         install-deps clean \
         e2e-up e2e-down e2e e2e-cross e2e-install e2e-report
 
 # --- E2E 服务编排 + 跨项目流程性 E2E ---
 COMPOSE_E2E := docker-compose.e2e.yml
 
-# 起 E2E 服务编排（MySQL/Redis/双后端/bff/engine/website）
+# 起 E2E 服务编排（MySQL/Redis/后端/bff/engine/website）
 e2e-up:
 	@bash scripts/e2e/up-all.sh
 
@@ -72,6 +72,14 @@ pr-all:
 test-coverage:
 	@bash scripts/coverage/coverage-summary.sh
 
+# 旅程覆盖率门禁（E2E 链路维度：聚合 journeys SSOT + 扫 @J-xxx 标签；P0 阻断）
+journey-coverage:
+	@bash scripts/coverage/journey-coverage.sh
+
+# 校验单个 taskGraph JSON schema（含 journeys 字段）
+verify-plan:
+	@node scripts/verify-plan-ssot.mjs validate $(JSON)
+
 # 各包测试（按技术栈）
 test:
 	@bash scripts/git/run-per-pkg.sh test
@@ -96,10 +104,6 @@ install-deps:
 # 启动慢（~30-60s），健康检查：http://localhost:8080/backend/actuator/health
 dev-java:
 	cd packages/backend/luban-backend && cmd //c start-mvn.bat
-
-# Go 后端（可选；双后端契约测试场景用。端口 8081）
-dev-go:
-	cd packages/backend/luban-backend-go && APP_PORT=8081 go run .
 
 # BFF（Next.js；显式 -p 3100，避免与 website 默认 3000 冲突）
 dev-bff:

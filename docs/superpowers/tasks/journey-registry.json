@@ -1,0 +1,54 @@
+{
+  "$schema": "全局用户旅程注册表（Journey Registry）",
+  "$doc": "现有功能的全局旅程总盘，作为 journey-coverage 的分母 SSOT。各 plan 的 taskGraph JSON 仅声明本期新增/修改的旅程（用 ref 引用此处的全局定义）。聚合脚本合并本文件 + 各 plan journeys[] 去重。详见 docs/dev/ssot-task-graph.md「旅程覆盖」。",
+  "$lastAudited": "2026-06-27",
+  "journeys": [
+    { "id": "J-auth", "title": "认证登录与登录态", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["登录成功跳工作台", "错误密码提示", "未授权重定向登录", "登出", "token 持久化（刷新保持登录）", "401 过期自动登出"], "status": "covered" },
+
+    { "id": "J-site-crud", "title": "站点管理 CRUD", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["站点列表加载", "新建站点（名称/slug/baseUrl/状态）", "编辑站点", "删除站点（确认）", "站点详情", "导航到页面列表"], "status": "covered" },
+
+    { "id": "J-page-crud", "title": "页面管理 CRUD", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["页面列表加载", "新建页面（名称/路径）", "编辑页面元信息", "删除页面（确认）"], "status": "covered" },
+
+    { "id": "J-publish", "title": "发布闭环（草稿/发布/下线/预览）", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["发布→status=published", "下线→status=archived", "草稿预览（编辑器内预览模式）", "草稿预览（独立预览页）", "已发布页面预览（公开 URL）", "发布后 website SSR 200 渲染", "下线后 website 404"], "status": "covered" },
+
+    { "id": "J-page-version", "title": "页面版本历史与回滚", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["查看版本历史", "选择版本回滚", "版本对比 diff"], "status": "covered", "note": "VersionHistoryDrawer 已挂载到 PageList；page_version.spec.ts 覆盖版本 API 生命周期（V1列表/V2回滚/V3预览）" },
+
+    { "id": "J-designer-canvas", "title": "设计器：画布拖拽编排", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["组件库拖入画布（drop-active/insert-line/preview-ghost）", "双击组件添加", "画布同级排序（SortableJS）", "跨嵌套容器移动", "非容器类型拒绝拖入", "拖拽视觉反馈（对齐辅助线/间距标签）", "空数据拖入错误提示"], "status": "covered" },
+
+    { "id": "J-designer-select", "title": "设计器：节点选中与大纲", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["点击选中节点（高亮+尺寸徽标+工具条）", "大纲树点击选中（三向同步）", "Esc 取消选中"], "status": "covered" },
+
+    { "id": "J-designer-prop", "title": "设计器：属性与样式编辑", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["属性面板改属性（实时重渲染）", "样式编辑（间距/颜色/选择器）", "属性搜索与分组折叠", "visibleWhen 条件字段"], "status": "covered" },
+
+    { "id": "J-designer-node-ops", "title": "设计器：节点操作（删除/复制/克隆/层级）", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["删除节点（右键菜单/工具条/键盘）", "复制/粘贴", "克隆（Ctrl+D/大纲树按钮）", "大纲树上移/下移", "置顶/置底"], "status": "covered", "note": "designer-edit E5（右键删除）+ designer-node-ops（N1克隆/N2复制粘贴/N3置顶/N4上移/N5键盘删除）" },
+
+    { "id": "J-designer-history", "title": "设计器：撤销/重做", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["撤销（Ctrl+Z/工具条）", "重做（Ctrl+Shift+Z/工具条）", "防抖快照（500ms）"], "status": "covered", "note": "designer-edit E2（撤销）+ designer-history（H1撤销/H2重做/H3多次undo）" },
+
+    { "id": "J-designer-mode", "title": "设计器：模式切换（预览/代码）", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["切换预览模式（访客视角渲染）", "切换代码模式（JSON 编辑+实时校验+格式化）"], "status": "gap", "gapReason": "预览模式有覆盖（designer-edit E6）；代码模式无 spec" },
+
+    { "id": "J-designer-device", "title": "设计器：设备断点与响应式", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["PC/iPad/H5 断点切换", "断点切换触发响应式属性渲染", "画布缩放/平移/网格"], "status": "covered", "note": "designer-device（D1默认PC/D2 iPad768px/D3 H5 375px/D4切回PC）" },
+
+    { "id": "J-designer-panel", "title": "设计器：面板交互", "priority": "P2", "entrySubsystem": "engine", "scenarios": ["折叠/展开左右栏", "组件库搜索与分类折叠", "最近使用组件"], "status": "covered", "note": "designer-panel（P1左折叠/P2左展开/P3右折叠/P4右展开）；组件库搜索为子场景待后续补" },
+
+    { "id": "J-user-mgmt", "title": "用户管理与 RBAC", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["用户列表（分页/搜索）", "新建用户（账号/密码/姓名/角色）", "编辑用户", "启用/禁用用户（状态转换）", "非管理员访问被拒（路由守卫→工作台）"], "status": "covered", "note": "users-crud（U1-U7: 列表/新建/编辑/禁用/启用/搜索/分页）+ navigation smoke；非admin 403分支待非admin账号fixture" },
+
+    { "id": "J-settings", "title": "系统设置", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["基础信息（站点名/Logo）保存", "安全（会话超时）保存", "通知开关保存", "保存后刷新持久"], "status": "covered", "note": "settings-save（S1加载/S2基础信息/S3安全/S4通知/S5刷新持久）+ navigation smoke" },
+
+    { "id": "J-dashboard", "title": "工作台概览", "priority": "P2", "entrySubsystem": "engine", "scenarios": ["统计卡片渲染（站点数/用户数/页面数）", "快捷入口导航"], "status": "covered", "note": "navigation smoke 覆盖加载；页面数卡片后端硬编码 0 为已知技术债" },
+
+    { "id": "J-nav", "title": "导航与布局", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["侧边栏菜单导航（工作台/站点/用户/设置）", "顶栏用户菜单（头像/角色徽标/登出）"], "status": "covered" },
+
+    { "id": "J-leads", "title": "线索闭环（表单提交→入库→脱敏展示）", "priority": "P0", "entrySubsystem": "website", "scenarios": ["website 表单提交闭环（填表→成功态）", "后端去重（409 LEAD_DUPLICATE）", "手机号脱敏展示（138****）", "UTM/渠道归因", "成功态变体（redirect/popup/toast）"], "status": "covered", "note": "lead-capture-flow（去重/脱敏）+ v02-funnel（UTM归因）；website表单UI成功态变体为后续增强点" },
+
+    { "id": "J-ssr", "title": "website SSR 渲染", "priority": "P0", "entrySubsystem": "website", "scenarios": ["已发布页 SSR 渲染（非 client-only）", "根路径重定向默认站点", "hydration 无 mismatch", "页面级 SEO meta（title/og/canonical）", "404 页面处理"], "status": "covered" },
+
+    { "id": "J-analytics", "title": "埋点上报与归因", "priority": "P1", "entrySubsystem": "website", "scenarios": ["page_view 埋点上报", "UTM 参数 SSR 解析", "visitor_id cookie 归因", "第三方 SDK 注入（GA4/百度/FB Pixel）"], "status": "covered", "note": "v02-funnel（page_view 埋点 + UTM SSR 解析）；第三方SDK注入为后续增强点" },
+
+    { "id": "J-ab-test", "title": "AB 实验分流", "priority": "P1", "entrySubsystem": "website", "scenarios": ["AB 分桶一致性（同 visitor 同变体）", "哈希分散性（不同 visitor 散布）"], "status": "covered", "note": "v02-funnel（分桶一致性 + 哈希分散性）" },
+
+    { "id": "J-feature-gate-visitor", "title": "访客侧 FeatureGate", "priority": "P2", "entrySubsystem": "website", "scenarios": ["读取公开 feature gate", "lead_capture 关闭→提交返回 LEAD_DISABLED"], "status": "covered", "note": "feature-gate-visitor（FG1读取配置/F2 fail-open/F3 lead_capture关闭）" },
+
+    { "id": "J-cms-collection", "title": "CMS 集合渲染", "priority": "P2", "entrySubsystem": "website", "scenarios": ["cmsBinding 节点拉取集合数据", "集合 items 渲染"], "status": "covered", "note": "cms-collection（C1 items数组结构/C2 不存在collection容错）" },
+
+    { "id": "J-billing", "title": "套餐与用量", "priority": "P2", "entrySubsystem": "engine", "scenarios": ["套餐列表（free/starter/growth）", "用量面板"], "status": "covered", "note": "billing（B1 三档套餐/B2 用量查询）；engine UI 用量面板为后续增强点" }
+  ]
+}

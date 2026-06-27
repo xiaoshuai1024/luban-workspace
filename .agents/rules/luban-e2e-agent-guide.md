@@ -69,9 +69,13 @@ test.describe("{物料} 渲染 @smoke", () => {
 
 ### 标签规范
 
+**执行分档维度**（运行时过滤用）：
 - `@smoke` — 冒烟级：核心渲染 + 主路径
 - `@core` — 核心级：事件链路 + props 边界
 - `@e2e` — 全量级：完整用户旅程
+
+**旅程覆盖维度**（度量用，正交于执行分档）：
+- `@J-<journey-id>` — 绑定到 plan 声明的用户旅程（如 `@J-publish`、`@J-leads`）。journey-id 来自 taskGraph JSON 的 `journeys[].id`（见 `docs/dev/ssot-task-graph.md`「旅程覆盖」）。用于 `scripts/verify-plan-ssot.mjs journey-coverage` 生成覆盖率矩阵；P0 旅程无 spec 绑定 → 阻断。可与其他标签共存，如 `test.describe('发布闭环 @smoke @J-publish', ...)`。
 
 ---
 

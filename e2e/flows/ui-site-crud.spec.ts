@@ -16,7 +16,7 @@ async function loginViaUI(page: import('@playwright/test').Page) {
   await page.waitForURL('**/dashboard', { timeout: 10000 });
 }
 
-test.describe('站点 CRUD', () => {
+test.describe('站点 CRUD @J-site-crud', () => {
   test.beforeEach(async ({ page }) => {
     await loginViaUI(page);
   });

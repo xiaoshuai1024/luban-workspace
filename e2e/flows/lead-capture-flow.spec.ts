@@ -19,7 +19,7 @@ import 'dotenv/config';
  */
 
 const WEBSITE_BASE = process.env.LUBAN_E2E_WEBSITE_URL ?? 'http://127.0.0.1:3000';
-const BFF_BASE = process.env.LUBAN_E2E_BFF_URL ?? 'http://127.0.0.1:3100';
+const BFF_BASE = process.env.LUBAN_E2E_BFF_URL ?? 'http://localhost:3000';
 const ACCOUNT = process.env.LUBAN_E2E_ACCOUNT!;
 const PASSWORD = process.env.LUBAN_E2E_PASSWORD!;
 
@@ -46,7 +46,7 @@ test.beforeAll(async () => {
   expect(formId, 'setup 须拿到 formId').toBeTruthy();
 });
 
-test.describe('流程B：线索闭环 @cross', () => {
+test.describe('流程B：线索闭环 @cross @J-leads', () => {
   test('website 表单提交 → backend 入库 → engine 线索中心可见', async ({ page }) => {
     test.setTimeout(120_000);
 

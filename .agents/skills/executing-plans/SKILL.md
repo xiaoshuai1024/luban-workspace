@@ -23,6 +23,7 @@ Every step in the plan MUST define its **verification gate** — the concrete ch
 | **TEST** | After logic/behavior changes | `mvn -q verify`, `pnpm vitest run` |
 | **LINT** | After code style / naming changes | `pnpm lint` |
 | **E2E** | After integration / route / API changes | `pnpm playwright test` |
+| **JOURNEY** | After E2E spec changes in plans with `journeys[]` | `make journey-coverage` (P0=100%) |
 | **MANUAL** | Unavoidable manual verification (rare) | Open browser, check X renders |
 
 **Rule:** If a step's gate fails, **stop and fix**. Do not proceed to the next step.

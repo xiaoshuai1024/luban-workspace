@@ -63,13 +63,16 @@
 
 ## 4. Tag 分档约定
 
-Playwright 测试使用 tag 过滤：
+Playwright/Cypress 测试使用 title-suffix tag（追加在 `describe`/`test.describe`/`test` 标题字符串末尾，空格分隔）：
 
-| Tag | 用途 | 预估数量 | 执行时间 |
-|-----|------|---------|---------|
-| `@smoke` | 核心功能冒烟，开发迭代时必跑 | 5-10 | <1min |
-| `@cross` | 跨端串联测试 | 5-10 | ~2min |
-| 无 tag | 全量验证（默认），提交/CI 前必跑 | 全部 | ~5-8min |
+| Tag | 用途 | 维度 | 预估数量 |
+|-----|------|------|---------|
+| `@smoke` | 核心功能冒烟，开发迭代时必跑 | 执行分档 | 5-10 |
+| `@cross` | 跨端串联测试 | 执行分档 | 5-10 |
+| `@J-<journey-id>` | 绑定到用户旅程（如 `@J-publish`、`@J-leads`），用于旅程覆盖率度量 | **旅程覆盖**（正交维度） | 按旅程数 |
+| 无 tag | 全量验证（默认），提交/CI 前必跑 | 执行分档 | 全部 |
+
+**旅程覆盖标签 `@J-<journey-id>`**：journey-id 来自 plan 的 taskGraph JSON `journeys[].id`（见 `docs/dev/ssot-task-graph.md`「旅程覆盖」）。一个 spec 可绑多个 `@J-xxx`（多旅程）。`scripts/verify-plan-ssot.mjs journey-coverage` 静态扫描这些标签生成覆盖率矩阵；P0 旅程无任何 spec 绑定 → 阻断合并。这是度量维度，**不用于运行时过滤**（运行时仍按 `@smoke`/`@cross` 或全量跑）。
 
 ## 5. luban 多端 E2E 模式
 

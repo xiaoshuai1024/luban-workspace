@@ -91,6 +91,19 @@ alwaysApply: true
 
 评估 E2E 覆盖时，须在 PR 或会话说明中标注是否达标；不满足时须逐条说明理由。
 
+## 旅程覆盖率门禁（MUST）
+
+E2E 链路覆盖的**主指标**是旅程覆盖率（非代码行覆盖率）。口径见 `docs/TESTING_SPEC.md`「旅程覆盖率度量」：
+
+- **分母**：所有 taskGraph JSON `journeys[]` 并集（全局旅程总盘）。
+- **分子**：spec 标题含 `@J-<journey-id>` 标签的旅程。
+- **门禁**：`make journey-coverage`（或 `node scripts/verify-plan-ssot.mjs journey-coverage`）。
+  - **P0 旅程须 100% 有 spec 绑定** → 否则 exit 1，阻断合并。
+  - P1/P2 缺口仅报告，不阻断。
+- **与代码行覆盖率正交**：`make test-coverage` 同时输出两个维度，任一 P0 阻断 → 整体阻断。
+
+新增/修改 E2E 链路的方案须在 §7.0 声明旅程并同步 taskGraph JSON（见 `.agents/rules/luban-task-graph-ssot.md`）。
+
 ## 分栈覆盖率门禁（MUST）
 
 | 子项目 | 工具 | 行覆盖率 | 分支覆盖率 | 备注 |

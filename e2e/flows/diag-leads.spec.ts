@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 import 'dotenv/config';
 
 // 临时诊断：用 storageState 访问线索中心，捕获网络请求与 siteId
-const BFF_BASE = process.env.LUBAN_E2E_BFF_URL ?? 'http://127.0.0.1:3100';
+const BFF_BASE = process.env.LUBAN_E2E_BFF_URL ?? 'http://localhost:3000';
 
-test('diag: engine leads network', async ({ page }) => {
+test('diag: engine leads network @J-leads', async ({ page }) => {
   // 先建一个 site + form + lead（API），拿 siteId
   const ctx = await page.request;
   const loginRes = await ctx.post(`${BFF_BASE}/api/auth/login`, {

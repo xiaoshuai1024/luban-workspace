@@ -7,13 +7,6 @@
         "GITHUB_PERSONAL_ACCESS_TOKEN": "<your-github-token>"
       }
     },
-    "memory": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "env": {
-        "MEMORY_FILE_PATH": "D:/codes/luban-workspace/.claude/memory/mcp-knowledge-graph.jsonl"
-      }
-    },
     "figma-mcp-go": {
       "command": "npx",
       "args": ["-y", "@vkhanhqui/figma-mcp-go@latest"],

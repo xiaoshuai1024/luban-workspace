@@ -1,0 +1,30 @@
+{
+  "name": "@luban/sprint-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Luban Sprint MCP — 敏捷开发全流程 MCP server（Sprint/Epic/Story/Release/Retro），与 SSOT 任务图联动，含实时 HTTP 看板",
+  "main": "dist/index.js",
+  "bin": {
+    "sprint-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.0.4",
+    "chokidar": "3.6.0",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
