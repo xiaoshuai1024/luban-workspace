@@ -3,6 +3,12 @@
   "title": "P0 发布闭环：草稿/发布分离 + 发布/下线/预览 + 版本历史前端",
   "createdAt": "2026-06-26",
   "status": "draft",
+  "journeys": [
+    {
+      "id": "J-publish",
+      "ref": true
+    }
+  ],
   "tasks": [
     {
       "id": "T1",
@@ -110,6 +116,7 @@
       "priority": "high",
       "dependsOn": ["T4", "T6", "T9", "T11"],
       "group": "cross",
+      "journey": "J-publish-detail",
       "verification": "mvn -q test -Dtest=PublishLoopIT"
     }
   ]

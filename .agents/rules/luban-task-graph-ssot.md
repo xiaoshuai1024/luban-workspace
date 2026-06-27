@@ -10,11 +10,12 @@ alwaysApply: false
 
 1. **每 feature 一份 JSON**：`docs/superpowers/tasks/<featureId>.json`，与 `feature/<name>` 或 plan slug 对齐。
 2. **`writing-plans`**：在 `docs/superpowers/plans/` **新建或实质性修改**计划时，**同一变更批次**须创建/更新对应 JSON，并在 plan 文首发 YAML 填写 `taskGraph`（与 `metadata.planPath` 互指）。
-3. **`executing-plans` / 开发**：开工任务 → `in_progress`；验证完成 → `done`；阻塞 → `blocked` + `blockedReason`；更新 `metadata.updatedAt`。
-4. **并行与子任务**：依赖图表达并行就绪集；子任务用 `parentId` 与 `id`（如 `3.1`）；不设单独「并行组」字段。
-5. **禁止**：仅写 Markdown 计划而不维护 JSON；仅在对话宣称完成而不更新 JSON。
-6. **校验**：提交前对改动过的任务图执行 `node scripts/verify-plan-ssot.mjs validate <path>`。
-7. **Plan 正文契约**：新建或实质性修改 `docs/superpowers/plans/**/*.md` 时须符合 `docs/SUPERPOWERS.md` 计划章节（需求溯源、按系统新增模块表、集成复用表、UX/架构自检、E2E 计划等）。
+3. **`journeys` 字段与 plan §7.0 一致（MUST）**：凡 plan 含 §7.0 用户旅程覆盖声明，对应 taskGraph JSON 须有 `journeys[]` 数组，id/优先级/场景与 §7.0 旅程声明表逐行一致；P0 旅程须有 spec 绑定 `@J-<id>`（见 `docs/dev/ssot-task-graph.md`「旅程覆盖」）。无 E2E 增量的 plan 可省略 `journeys`。
+4. **`executing-plans` / 开发**：开工任务 → `in_progress`；验证完成 → `done`；阻塞 → `blocked` + `blockedReason`；更新 `metadata.updatedAt`。
+5. **并行与子任务**：依赖图表达并行就绪集；子任务用 `parentId` 与 `id`（如 `3.1`）；不设单独「并行组」字段。
+6. **禁止**：仅写 Markdown 计划而不维护 JSON；仅在对话宣称完成而不更新 JSON。
+7. **校验**：提交前对改动过的任务图执行 `node scripts/verify-plan-ssot.mjs validate <path>`（schema）+ `node scripts/verify-plan-ssot.mjs journey-coverage`（旅程覆盖率，P0 阻断）。
+8. **Plan 正文契约**：新建或实质性修改 `docs/superpowers/plans/**/*.md` 时须符合 `docs/SUPERPOWERS.md` 计划章节（需求溯源、按系统新增模块表、集成复用表、UX/架构自检、E2E 计划等）。
 
 ## 与 GitHub
 

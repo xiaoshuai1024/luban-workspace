@@ -7,7 +7,7 @@ import { test, expect, request } from '@playwright/test';
  */
 
 const ENGINE = 'http://localhost:5173';
-const BFF = 'http://127.0.0.1:3100';
+const BFF = process.env.LUBAN_E2E_BFF_URL ?? 'http://localhost:3000';
 
 let siteId: string;
 let siteSlug: string;
@@ -16,7 +16,7 @@ test.beforeAll(async () => {
   // 造数据：通过 API 创建测试站点（不代替 UI 测试，仅提供前置数据）
   const ctx = await request.newContext();
   const loginRes = await ctx.post(`${BFF}/api/auth/login`, {
-    data: { username: 'admin', password: 'password123' },
+    data: { username: 'admin', password: 'admin123' },
   });
   const { token } = await loginRes.json();
   siteSlug = `e2e-ui-${Date.now()}`;
@@ -36,7 +36,7 @@ async function loginViaUI(page: import('@playwright/test').Page) {
   await page.waitForURL('**/dashboard', { timeout: 10000 });
 }
 
-test.describe('页面发布闭环', () => {
+test.describe('页面发布闭环 @J-publish', () => {
   test.beforeEach(async ({ page }) => {
     await loginViaUI(page);
   });

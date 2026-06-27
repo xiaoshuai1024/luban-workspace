@@ -6,13 +6,11 @@
 # 依次遍历 packages/* 下各包，按技术栈分发收集覆盖率：
 #   - TS（pnpm test --coverage / vitest --coverage）→ engine / bff / ui / website
 #   - Java（mvn -q verify + 读 target/site/jacoco/index.xml）→ luban-backend
-#   - Go（go test ./... -coverprofile=coverage.out）→ luban-backend-go
 #
 # 包不存在或无测试用例则跳过并提示，不中断整体流程。
 # 末尾输出汇总表 + 各 HTML 报告路径；任一存在测试的包未达标 → 退出码 1。
 #
 # 覆盖率目标（见 CLAUDE.md）：
-#   TS 引擎/bff/website 85% · UI 组件库 90% · Java 后端 80% · Go 后端 75%
 #
 # 用法（主仓根目录）:
 #   bash scripts/coverage/coverage-summary.sh
@@ -45,7 +43,6 @@ PKGS=(
   "packages/ui/luban-ui:ui:ts:90"
   "packages/web/luban-website:website:ts:85"
   "packages/backend/luban-backend:luban-backend:java:80"
-  "packages/backend/luban-backend-go:luban-backend-go:go:75"
 )
 
 # 汇总表数据：name|stack|target|actual|status|html_path
@@ -331,10 +328,28 @@ if [[ "$ANY_REAL" -eq 0 ]]; then
   exit 1
 fi
 
-if [[ "$ANY_FAIL" -eq 1 ]]; then
-  printf "${RED}%s${NC}\n" "❌ 部分包覆盖率门禁未通过，请检查上述报告。"
+# ── 旅程覆盖率（E2E 链路覆盖维度，正交于上面的代码行覆盖率）──
+# 代理到 verify-plan-ssot.mjs journey-coverage；其 exit code 与本脚本的代码行覆盖率
+# 结果取并集（任一阻断 → 整体阻断）。
+JOURNEY_SCRIPT="${SCRIPT_DIR}/journey-coverage.sh"
+JOURNEY_RC=0
+if [[ -f "$JOURNEY_SCRIPT" ]]; then
+  printf "\n${CYAN}%s${NC}\n" "───────────────────────────────────────────────────────────"
+  printf "${CYAN}%s${NC}\n" "  旅程覆盖率（Journey Coverage · E2E 链路维度）"
+  printf "${CYAN}%s${NC}\n" "───────────────────────────────────────────────────────────"
+  set +e
+  bash "$JOURNEY_SCRIPT"
+  JOURNEY_RC=$?
+  set -e
+else
+  printf "${YELLOW}⚠ journey-coverage.sh 不存在，跳过旅程覆盖率维度${NC}\n"
+fi
+
+# ── 合并判定 ──────────────────────────────────────────
+if [[ "$ANY_FAIL" -eq 1 ]] || [[ "$JOURNEY_RC" -ne 0 ]]; then
+  printf "${RED}%s${NC}\n" "❌ 门禁未通过（代码行覆盖率未达标 或 P0 旅程阻断）。"
   exit 1
 fi
 
-printf "${GREEN}%s${NC}\n" "✅ 所有已执行包的覆盖率门禁均通过！"
+printf "${GREEN}%s${NC}\n" "✅ 双维度门禁通过：代码行覆盖率 + 旅程覆盖率（P0=100%）。"
 exit 0

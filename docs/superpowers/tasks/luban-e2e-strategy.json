@@ -6,6 +6,16 @@
   "status": "approved",
   "branchStrategy": "workspace feature/luban-e2e-strategy；engine feature/luban-e2e-migration；website feature/add-e2e；ui feature/luban-e2e-migration",
   "framework": "Playwright (全栈统一)",
+  "journeys": [
+    { "id": "J-auth", "ref": true },
+    { "id": "J-publish", "ref": true },
+    { "id": "J-leads", "ref": true },
+    { "id": "J-designer-canvas", "ref": true },
+    { "id": "J-designer-select", "ref": true },
+    { "id": "J-designer-prop", "ref": true },
+    { "id": "J-designer-mode", "ref": true },
+    { "id": "J-ssr", "ref": true }
+  ],
   "gateTargets": {
     "realness": "engine 任意 e2e 在 backend 停服时必须红（证非假绿）",
     "crossFlow": "发布闭环/线索闭环/双后端一致性三条均绿，且断一环则红",

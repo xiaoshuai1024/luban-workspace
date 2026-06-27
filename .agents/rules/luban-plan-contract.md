@@ -12,9 +12,10 @@ alwaysApply: false
 
 1. 编写前加载 `docs/SUPERPOWERS.md`「计划类 Skill 的触发时机」与方案章节，核对必选内容（需求溯源、按系统新增功能模块表、列表级交互链路、页面结构展示与高保真原型、集成复用表、UX/架构自检、E2E 计划含 P0、跨端主路径、脚本保障逻辑、文首 `taskGraph`）。
 2. 执行与收尾对齐 `docs/SUPERPOWERS.md`「AGENT_WORKFLOW_CONSTRAINTS」（TDD、并行 subagent 条件、Console→Network→后端日志、verification）。
-3. 任务状态以任务图 JSON 为准；校验 `node scripts/verify-plan-ssot.mjs validate <path>`。
+3. 任务状态以任务图 JSON 为准；校验 `node scripts/verify-plan-ssot.mjs validate <path>`（schema）+ `node scripts/verify-plan-ssot.mjs journey-coverage`（旅程覆盖率，P0 阻断）。
 4. **范围与质量（对齐 `/plan-template`）**：采用**最完整可交付策略**——需求内功能**不得静默跳过**；同时**控制功能膨胀**——凡非需求原文或本期目标所必需的能力，须列入「**明确不做 / 后续迭代**」并说明理由，禁止无边界镀金。禁止假绿、占位、骨架页、以 raw JSON 顶替用户页面；页面交互须与 E2E 计划可验收对齐。
-5. **多维结论落盘**：若用户要求将并行多视角结论写入本 plan，须按 **`/10-bs`** 执行：仅将**综合结论**写入目标文档的约定章节，不得把分轮过程堆进 plan。
+5. **旅程覆盖一致性（MUST）**：凡 plan 含 §7.0 用户旅程覆盖声明，定稿前须核对：(a) 旅程声明表与 taskGraph JSON `journeys[]` 逐行一致；(b) P0 旅程在 §7.3 场景表有对应 `@J-<id>` 绑定；(c) `make journey-coverage` 跑通（P0=100%）。无 E2E 增量的 plan 可跳过。
+6. **多维结论落盘**：若用户要求将并行多视角结论写入本 plan，须按 **`/10-bs`** 执行：仅将**综合结论**写入目标文档的约定章节，不得把分轮过程堆进 plan。
 6. **编写方案时可按需加载的 skills**（路径以仓库为准）：`architecture-review-e2e-tdd`、`ux-product-review`（与 `/super-pm`）、`writing-plans`、`brainstorming`（需求含混或创新点前）、`ten-round-brainstorm`（与 `/10-bs` 配套）。
 
 本规则为 **fail open** 提醒；合并不以此文件为唯一门禁，仍以人审与 CI 为准。

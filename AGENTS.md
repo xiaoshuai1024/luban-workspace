@@ -114,16 +114,26 @@ luban-workspace/                  # meta 仓
 
 0. **信息完整性**：需求/信息有缺口须先询问（`luban-no-speculation`）
 1. **每日远端同步检查**：pending JSON 弹窗
-2. **优化待办扫描**：启动新迭代或排期规划前，扫描根目录 `TODO.md`，列出所有 `status ≠ done` 的条目并提示排进迭代
-3. **加载核心文档**：`SUPERPOWERS` / `GIT_WORKFLOW`
-4. **加载项目级 skills**：`.agents/skills/`
-5. **检查 MCP memory**
+2. **进行中工作注入（自动）**：会话启动时 `SessionStart` hook 自动运行 `scripts/session/in-progress-summary.mjs`，从 SSOT `docs/superpowers/tasks/*.json` 抽取非终态任务摘要注入上下文——**开工无需手动喂进度**。优先处理「进行中/阻塞」，下一批看「待办」。承接某项用 `/jx`。
+3. **优化待办扫描**：启动新迭代或排期规划前，扫描根目录 `TODO.md`，列出所有 `status ≠ done` 的条目并提示排进迭代
+4. **加载核心文档**：`SUPERPOWERS` / `GIT_WORKFLOW`
+5. **加载项目级 skills**：`.agents/skills/`
 6. **协作粒度**：能开 subagent 就并行
 7. **Git 分支检查**：第一次写入前；默认留用户当前分支
 8. **Worktree 约定**：计划类用 `.worktrees/`
 9. **双后端提醒**：改 backend 时检查是否需同步另一端
 10. **低代码引擎提醒**：改 engine/ui/schema 时检查各端渲染一致
 11. **非沙箱权限确认**：新会话执行非沙箱命令前询问
+
+### 会话记忆闭环（MUST）
+
+进度记忆**只存 SSOT，不靠对话**。完成/阻塞任何任务后：
+
+1. 更新 `docs/superpowers/tasks/<featureId>.json` 对应 task 的 `status`（`in_progress`/`done`/`blocked`+`blockedReason`）与 `metadata.updatedAt`；
+2. 下一会话 SessionStart hook 会自动读出——无需手动汇报"上次做到哪"；
+3. 经验类教训（"不要再犯"）：先落对应 rule 文件 `.agents/rules/*.md`，成熟后由 `self-improve.md` 机制升级。
+
+> 已废弃：早期配置的 memory MCP（`@modelcontextprotocol/server-memory`，D:/ 路径）已移除——知识图谱 JSONL 不进 git、与你"完成任务时间线"的需求不匹配。记忆统一走 task 图 JSON + rules 文件，皆 version-controlled。
 
 ---
 

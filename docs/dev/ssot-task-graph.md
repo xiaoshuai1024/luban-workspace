@@ -22,7 +22,18 @@
       "status": "pending",
       "dependsOn": ["task-000"],
       "group": "A",
-      "subsystem": "backend"
+      "subsystem": "backend",
+      "journey": "J-publish"
+    }
+  ],
+  "journeys": [
+    {
+      "id": "J-publish",
+      "title": "发布闭环",
+      "priority": "P0",
+      "scenarios": ["发布", "下线", "版本回滚"],
+      "entrySubsystem": "engine",
+      "status": "covered"
     }
   ]
 }
@@ -41,6 +52,14 @@
 | `tasks[].dependsOn` | string[] | 前置依赖的任务 ID 列表，空数组=无依赖可并行 |
 | `tasks[].group` | string | 并行组：同组可并行执行，A→B→C 表示先后顺序 |
 | `tasks[].subsystem` | enum | 所属子系统 |
+| `tasks[].journey` | string? | （可选）关联的用户旅程 id，软引用 `journeys[].id` |
+| `journeys[].id` | string | 旅程唯一 id，建议 `J-<语义短词>`（如 `J-publish`、`J-leads`），跨 plan 可复用 |
+| `journeys[].title` | string | 旅程中文名 |
+| `journeys[].priority` | enum | `P0`（阻断门禁）/ `P1` / `P2` |
+| `journeys[].scenarios` | string[] | 旅程覆盖的场景（发布/下线/版本回滚…），用于断言密度评估 |
+| `journeys[].entrySubsystem` | enum | 入口子系统（engine / website / workspace） |
+| `journeys[].status` | enum | `declared` / `covered` / `gap`（声明、已绑定 spec、缺 spec） |
+| `journeys[].ref` | boolean? | `true` 表示仅引用已在别处定义的旅程，不重复填 title/priority 等字段 |
 
 ### luban subsystem 取值
 
@@ -53,10 +72,25 @@
 - `client` — 多端（electron/flutter/cross-platform）
 - `cross` — 跨子系统
 
+## 旅程覆盖（Journey Coverage）
+
+`journeys` 数组是 E2E 链路覆盖率的**结构化分母**。每个 plan 在 §7.0 声明本期旅程并同步到此 JSON；spec 侧通过标题后缀标签 `@J-<id>` 绑定到旅程（见 `docs/dev/e2e-test-style-guide.md` §4）。
+
+**引用规则**：旅程**首次定义**在引入它的 plan（带完整字段）；后续 plan 引用同一 id 只写 `{"id":"J-publish","ref":true}`，聚合脚本以首次定义为准并合并 scenarios。
+
+**全局旅程总盘** = 所有 taskGraph JSON 中 `journeys` 的并集（按 id 去重），作为 `journey-coverage` 报告的分母。无 `journeys` 字段的 plan（纯后端/纯修复）不计入分母，聚合时跳过。
+
+**门禁**：`P0` 旅程若已声明却无任何 spec 绑定 `@J-<id>` → `journey-coverage` 脚本 exit 1（阻断合并）；`P1`/`P2` 仅在报告中显示覆盖率与缺口，不阻断。
+
 ## 校验
 
 ```bash
+# 校验单个 JSON schema（含 journeys 可选字段、task.journey 引用合法性）
 node scripts/verify-plan-ssot.mjs validate <path-to-json>
+
+# 聚合所有 taskGraph JSON 的旅程总盘 + 扫描所有 spec 的 @J-xxx 标签 → 覆盖率矩阵
+# P0 旅程无 spec 绑定 → exit 1
+node scripts/verify-plan-ssot.mjs journey-coverage
 ```
 
 ## 原则

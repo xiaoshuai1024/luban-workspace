@@ -13,7 +13,7 @@ import 'dotenv/config';
  */
 
 const WEBSITE_BASE = process.env.LUBAN_E2E_WEBSITE_URL ?? 'http://127.0.0.1:3000';
-const BFF_BASE = process.env.LUBAN_E2E_BFF_URL ?? 'http://127.0.0.1:3100';
+const BFF_BASE = process.env.LUBAN_E2E_BFF_URL ?? 'http://localhost:3000';
 const RUN_ID = `e2e-${Date.now()}`;
 const SITE_NAME = `${RUN_ID}-site`;
 const PAGE_NAME = `${RUN_ID}-page`;
@@ -55,7 +55,7 @@ test.beforeAll(async () => {
   await ctx.dispose();
 });
 
-test.describe('流程A：发布闭环 @cross', () => {
+test.describe('流程A：发布闭环 @cross @J-publish', () => {
   test('建站点 → 建页面 → 发布 → website SSR 渲染', async ({ page }) => {
     test.setTimeout(120_000);
 

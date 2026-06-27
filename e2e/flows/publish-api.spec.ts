@@ -1,11 +1,12 @@
 import { test, expect, request } from '@playwright/test';
 
-const BFF = 'http://127.0.0.1:3100';
-const ADMIN = { username: 'admin', password: 'password123' };
+const BFF = process.env.LUBAN_E2E_BFF_URL ?? 'http://localhost:3000';
+const ADMIN = { username: 'admin', password: 'admin123' };
 
-test.describe('P0 发布闭环 API E2E', () => {
+test.describe('P0 发布闭环 API E2E @J-publish', () => {
   let adminToken: string;
   let siteId: string;
+  let siteSlug: string;
   let pageId: string;
 
   test.beforeAll(async () => {
@@ -23,6 +24,7 @@ test.describe('P0 发布闭环 API E2E', () => {
     });
     const site = await siteRes.json();
     siteId = site.id;
+    siteSlug = siteSlug;
     expect(siteId).toBeTruthy();
   });
 
@@ -51,7 +53,7 @@ test.describe('P0 发布闭环 API E2E', () => {
     expect(pubBody.status).toBe('published');
 
     // 3. 公开可见
-    const publicRes = await ctx.get(`${BFF}/api/public/sites/${site.slug}/pages?path=${page.path}`);
+    const publicRes = await ctx.get(`${BFF}/api/public/sites/${siteSlug}/pages/by-path?path=${page.path}`);
     expect(publicRes.status()).toBe(200);
 
     // 4. 下线
@@ -61,7 +63,7 @@ test.describe('P0 发布闭环 API E2E', () => {
     expect(unpubBody.status).toBe('archived');
 
     // 5. 公开 404
-    const afterUnpub = await ctx.get(`${BFF}/api/public/sites/${site.slug}/pages?path=${page.path}`);
+    const afterUnpub = await ctx.get(`${BFF}/api/public/sites/${siteSlug}/pages/by-path?path=${page.path}`);
     expect(afterUnpub.status()).toBe(404);
   });
 

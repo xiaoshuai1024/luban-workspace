@@ -59,6 +59,19 @@
 | 删除操作 | 1 | 删除前确认 + 删除后列表不包含 |
 | 引擎渲染新物料 | 2 | 默认渲染 + props 边界 |
 
+### 旅程覆盖率度量（Journey Coverage）
+
+E2E 覆盖率的**主指标是旅程覆盖率，不是代码行覆盖率**。代码行覆盖率（V8/JaCoCo）在 E2E 下会严重虚高（一条链路路过一大片代码但不一定有断言），仅作"死区发现"辅助。
+
+**口径**：
+$$\text{旅程覆盖率} = \frac{\text{有 spec 绑定的旅程数}}{\text{已声明的旅程总数}}$$
+
+- **分母**：所有 taskGraph JSON `journeys[]` 的并集（全局旅程总盘，见 `docs/dev/ssot-task-graph.md`）。
+- **分子**：spec 标题含 `@J-<journey-id>` 标签的旅程（见 `docs/dev/e2e-test-style-guide.md` §4）。
+- **门禁**：`make journey-coverage` → P0 旅程须 100% 有 spec 绑定（阻断合并）；P1/P2 仅报告覆盖率与缺口，不阻断。
+
+**与代码行覆盖率的关系**：二者正交。`make test-coverage` 同时输出两个维度（代码行覆盖率 + 旅程覆盖率），任一 P0 阻断 → 整体阻断。
+
 ---
 
 ## 集成测试规范

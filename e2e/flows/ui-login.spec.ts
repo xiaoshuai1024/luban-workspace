@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 const ENGINE = 'http://localhost:5173';
 
-test.describe('登录流程', () => {
+test.describe('登录流程 @J-auth', () => {
   test('登录表单可见', async ({ page }) => {
     await page.goto(`${ENGINE}/login`);
     await expect(page.getByText('Luban 管理后台')).toBeVisible();
