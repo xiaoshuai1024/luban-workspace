@@ -2,7 +2,9 @@
 featureId: luban-ai-assistant-program
 title: Luban AI 助手项目集（Program）— 独立 Python AI 子项目
 createdAt: 2026-06-19
-status: approved
+status: deprecated
+deprecatedReason: 被 .agents/plans/2026-06-28-luban-ai-assistant-2026.md 替代(2026-06-28)。选型过时(Milvus+前端直连),且 packages/ai/luban-ai-assistant 实为空目录,标 implemented 但未真正落地。新方案改用 Qdrant+LiteLLM+BFF 反代。
+supersededBy: luban-ai-assistant-2026
 program: true
 taskGraph: docs/superpowers/tasks/luban-ai-assistant-program.json
 contractSource: plan-template 命令体 + writing-plans SKILL + PLAN_WRITING_CONTRACT.md

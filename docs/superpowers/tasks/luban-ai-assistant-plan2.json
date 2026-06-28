@@ -3,7 +3,9 @@
   "title": "Luban AI 助手 P2 — 设计稿/截图转页面（多模态）",
   "type": "plan",
   "createdAt": "2026-06-19",
-  "status": "implemented",
+  "status": "deprecated",
+  "deprecatedReason": "被 docs/superpowers/tasks/luban-ai-assistant-2026.json 替代(2026-06-28)。原因:依赖的 plan1 选型过时且未落地;新方案将多模态作为显式延后项(见 2026-06-28 plan §10)。",
+  "supersededBy": "luban-ai-assistant-2026",
   "branchStrategy": "ai 子仓 feature/luban-ai-assistant-plan2；engine 子仓 feature/luban-ai-assistant-plan2 同名分支",
   "parentProgram": "luban-ai-assistant-program",
   "dependsOnPlan": [
