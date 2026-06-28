@@ -41,7 +41,7 @@ test.afterAll(async () => {
   }
 });
 
-test.describe('数据源管理 API @J-datasource', () => {
+test.describe('数据源管理 API @J-datasource @J-contract-parity', () => {
   test('DS1: 创建 static 数据源', async () => {
     const r = await apiCtx.post(`${BFF_BASE}/api/datasources?siteId=${siteId}`, {
       headers: authHeaders(token),
