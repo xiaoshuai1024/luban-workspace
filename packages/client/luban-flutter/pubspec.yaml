@@ -1,0 +1,31 @@
+name: luban_flutter
+description: "Luban 低代码平台 Flutter 展示端（app-deeplink-backend-arch plan Group D）。
+通过短链/Universal Link 打开指定站点页面，拉取 PageSchema 并渲染文本内容；直接打开展示兜底页。"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  # app-deeplink-backend-arch T19: 接收 Universal Link (iOS) / App Link (Android)
+  app_links: ^6.3.2
+  # T20: HTTP 客户端（拉 page schema / 短链解析）
+  dio: ^5.7.0
+  # T18: 声明式路由 + redirect 钩子（深链处理）
+  go_router: ^14.6.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  # integration_test for deeplink E2E (T19/T20/T21/T22)
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
