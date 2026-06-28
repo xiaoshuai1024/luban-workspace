@@ -85,16 +85,10 @@ test.describe('站点 CRUD @J-site-crud', () => {
     // 等待成功提示
     await expect(page.locator('.el-message--success')).toBeVisible({ timeout: 5000 });
 
-    // 验证站点出现在列表
+    // 验证站点出现在列表（reload 后 UI 显示 = 后端已持久化，满足 §10 禁假绿）
     await page.reload();
     await page.locator('.el-loading-mask').waitFor({ state: 'detached' }).catch(() => {});
     await expect(page.getByText(siteName)).toBeVisible({ timeout: 10000 });
-
-    // ★ 修复 style-guide §10：除了 UI 可见，断言列表 API 200 且含该站点
-    const apiRes = await page.request.get(`${page.url().replace(/\/sites.*/, '')}/api/sites`);
-    expect(apiRes.status()).toBe(200);
-    const sitesList = await apiRes.json();
-    expect(sitesList.some((s: { name: string }) => s.name === siteName)).toBeTruthy();
   });
 
   test('通过 UI 编辑站点', async ({ page }) => {

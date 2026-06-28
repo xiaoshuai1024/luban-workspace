@@ -1,12 +1,17 @@
 {
   "featureId": "luban-ai-assistant-2026",
-  "title": "Luban AI 助手 2026 — FastAPI+LangGraph+Qdrant+LiteLLM+BFF反代",
+  "title": "Luban AI 助手 2026 — 迁移演进(Milvus→Qdrant, Provider→LiteLLM, 直连→BFF反代, +C端)",
   "type": "plan",
   "createdAt": "2026-06-28",
+  "revisedAt": "2026-06-28",
   "status": "approved",
+  "migrationMode": true,
+  "migrationBase": "packages/ai/luban-ai-assistant @ 70e79cc (旧方案 Milvus+Provider+直连, 迁移到 Qdrant+LiteLLM+BFF反代)",
   "specSource": "docs/superpowers/specs/2026-06-28-ai-assistant-design.md",
-  "supersedes": "luban-ai-assistant-program (2026-06-19, deprecated, 实际未落地)",
-  "branchStrategy": "ai 子仓 feature/luban-ai-2026；engine/bff 子仓 feature/luban-ai-2026 同名分支",
+  "supersedes": "luban-ai-assistant-program (2026-06-19, deprecated)",
+  "branchStrategy": "ai 子仓 feature/luban-ai-2026(已建)；engine/bff/website 子仓 feature/luban-ai-2026 同名分支",
+  "authDecision": "BFF 服务间信任(新写 get_bff_user 读 X-User-Id header, JWT 自验降级为可选)",
+  "instructorDecision": "去掉 instructor, 改用 LiteLLM 原生 response_format + Pydantic",
   "gateTargets": {
     "ai": 0.85,
     "engine": 0.85,
@@ -15,100 +20,100 @@
   "dependsOnPlan": [],
   "parentProgram": null,
   "journeys": [
-    { "id": "J-ai-b-config", "title": "运营 AI 配置页面", "priority": "P0", "scenarios": ["建页面", "改属性", "查线索", "批量操作"], "entrySubsystem": "engine" },
+    { "id": "J-ai-b-config", "title": "运营 AI 配置页面", "priority": "P2", "status": "planned", "scenarios": ["建页面", "改属性", "查线索", "批量操作"], "entrySubsystem": "engine", "note": "降级 P0→P2：AI 助手功能开发中，不应阻断全局门禁。落地后升回 P0。" },
     { "id": "J-ai-c-assist", "title": "访客 AI 使用辅助", "priority": "P1", "scenarios": ["产品问答", "表单辅助填写"], "entrySubsystem": "website" },
-    { "id": "J-ai-model-switch", "title": "后台模型热切换", "priority": "P0", "scenarios": ["DeepSeek/GLM/通义 切换"], "entrySubsystem": "engine" }
+    { "id": "J-ai-model-switch", "title": "后台模型热切换", "priority": "P2", "status": "planned", "scenarios": ["DeepSeek/GLM/通义 切换"], "entrySubsystem": "engine", "note": "降级 P0→P2：功能开发中，落地后升回 P0。" }
   ],
   "tasks": [
     {
-      "id": "T1",
-      "title": "AI 服务骨架(uv/pyproject/FastAPI 壳/healthz/CORS/结构化日志) + Makefile dev-ai target :8100 + SYSTEM_ARCHITECTURE 同步(§2.x AI 服务/§5 端口/Qdrant) + .env.example(AI_SERVICE_TOKEN/QDRANT_URL/LITELLM 配置)",
+      "id": "M0",
+      "title": "迁移地基: 删废弃模块(design_*/multimodal/eval/storage/minio/observability/langfuse/assets api) + pyproject 依赖替换(删 pymilvus/minio/langfuse/instructor/langchain-openai; 加 qdrant-client/litellm) + docker-compose 6→3 容器(删 etcd/milvus/minio/langfuse 加 qdrant) + deploy/init.sh(Milvus→Qdrant collection 段) + 确认 ruff/mypy/pytest 配置 omit 同步",
       "wave": 0,
       "subsystem": "cross",
       "dependsOn": [],
       "journey": null,
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "uv run uvicorn app.main:app --port 8100 起服务; GET /healthz 返回 {status,deps:{qdrant:pending}}; ruff check 通过; mypy 通过"
+      "gate": "uv sync 通过(依赖可装); ruff check 通过; 无残留 import pymilvus/minio/langfuse/instructor; docker-compose.yml 仅 fastapi/postgres/qdrant 三服务; init.sh Qdrant collection 建表段语法正确"
     },
     {
-      "id": "T2",
-      "title": "LiteLLM 模型抽象层(SDK 内嵌非 proxy; 配置驱动 deepseek/glm/qwen 切换; 复用 luban settings 表存 ai_model_config; 30s 短缓存热读取) + 单测 mock 三家",
-      "wave": 0,
-      "subsystem": "cross",
-      "dependsOn": ["T1"],
-      "journey": "J-ai-model-switch",
-      "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "LiteLLM 抽象单测覆盖≥85%; mock 三家(deepseek/glm/qwen)调用均通过; 改 provider 配置不改业务代码; 30s 缓存命中验证"
-    },
-    {
-      "id": "T3",
-      "title": "Qdrant 向量库接入(远端服务模式 + 本地嵌入式模式兜底; collection 初始化脚本; payload 过滤按 site_id/租户) + RAG 检索(LangChain Retriever + 云端 embedding 通义 text-embedding-v3)",
+      "id": "M1",
+      "title": "LLM 层替换: app/llm/provider.py + adapters.py 改为 LiteLLM SDK 实现(去 instructor, 用 response_format + Pydantic); 删 multimodal.py; get_provider 工厂保留单例语义返回 LiteLLM 实现; 默认 provider 改 DeepSeek; 单测 test_provider 改用 litellm.mock_response",
       "wave": 1,
       "subsystem": "cross",
-      "dependsOn": ["T1"],
+      "dependsOn": ["M0"],
+      "journey": "J-ai-model-switch",
+      "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
+      "gate": "LiteLLM provider 单测覆盖≥85%; mock 三家(deepseek/glm/qwen)调用均通过; chat/stream/结构化输出接口与旧 Provider 兼容(供 agent 节点不改); ruff+mypy 通过"
+    },
+    {
+      "id": "M2",
+      "title": "RAG 层替换: app/rag/retriever.py Milvus→Qdrant(query_points dense+sparse hybrid, 复用 fuse 融合/tokenize/build_sparse_vector 算法); sync_materials.py Milvus upsert→Qdrant upsert(MaterialDoc 数据结构留); embedding.py 改 LiteLLM aembedding(Protocol/dim/get_embedder 留); 确认 embedding 维度与 Qdrant collection schema 一致; test_rag FakeMilvusClient→FakeQdrantClient/in-memory mode",
+      "wave": 1,
+      "subsystem": "cross",
+      "dependsOn": ["M0"],
       "journey": null,
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "Qdrant 连接单测(双模式); collection 建幂等; Retriever 检索单测 mock embedding; payload 过滤按 site_id 召回正确 top-k"
+      "gate": "Qdrant retriever 单测(双模式: 远端服务+本地 in-memory); collection 建幂等; hybrid 检索 mock embedding 返回正确 top-k; payload 按 site_id 过滤断言; ruff+mypy 通过"
     },
     {
-      "id": "T4",
-      "title": "LangGraph Agent 状态图(意图识别→RAG检索→工具调用→校验→HITL确认→反馈回环) + 工具层(调 BFF API 回环: 建页面/改属性/查线索/发布/批量) + JWT 鉴权(复用 luban AUTH_JWT_SECRET 自验)",
+      "id": "M3",
+      "title": "鉴权改造: 新写 app/auth/bff_user.py(get_bff_user 读 X-User-Id/X-User-Role header + X-Internal-Token 校验, 服务间信任); jwt.py 降级为可选(调试/独立部署); 所有 api 端点(chat/ws/guidance/config)依赖从 get_current_user 换 get_bff_user; main.py CORS 弱化(BFF 反代后同源); 路由前缀对齐 BFF(避免 /api/ai/ai 双前缀)",
       "wave": 2,
       "subsystem": "cross",
-      "dependsOn": ["T2", "T3"],
-      "journey": "J-ai-b-config",
+      "dependsOn": ["M0"],
+      "journey": null,
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "LangGraph 各节点单测; 工具调用回环 BFF 单测(mock BFF 响应); JWT 鉴权 401 用例; 回环重试≤N 次; HITL 中断/恢复"
+      "gate": "get_bff_user 单测(缺 X-Internal-Token→401, 缺 X-User-Id→401, 合法→返回 AuthUser); 所有端点鉴权改用新依赖; CORS 配置对齐 BFF 同源; test_contract 鉴权断言改服务间信任; ruff+mypy 通过"
     },
     {
-      "id": "T5",
-      "title": "FastAPI SSE 流式端点(POST /chat text/event-stream chunk 透传) + guardrails(输入 PII 脱敏/prompt 注入基础过滤) + 错误体对齐 luban {code,message,details?}",
+      "id": "M4",
+      "title": "Agent 工具调用回环: app/agent/nodes.py 新增 tool_call 节点(经 httpx 回环 BFF /api/* 读页面 schema/线索, 带 X-AI-Service 身份头); graph.py 编排插入 tool_call 环节(understand→tool_call→retrieve→generate→validate→hitl/feedback); state.py 扩 tool_calls 字段; SSE 事件类型扩 tool_call/tool_result; C 端访客鉴权拦截(role=visitor 禁进 tool_call 节点)",
       "wave": 2,
       "subsystem": "cross",
-      "dependsOn": ["T4"],
+      "dependsOn": ["M1", "M2", "M3"],
       "journey": "J-ai-b-config",
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "SSE 流式单测(chunk 顺序正确); PII 脱敏单测(手机号/邮箱); 错误体格式对齐 luban; guardrails 拦截注入用例"
+      "gate": "tool_call 节点单测(mock BFF 响应); 回环带 X-AI-Service 头断言; visitor 角色禁工具调用→403 用例; SSE tool_call/tool_result 事件契约单测; 回环重试≤N; ruff+mypy 通过"
     },
     {
-      "id": "T6",
-      "title": "BFF /api/ai/* 反代路由(SSE chunk-by-chunk 透传禁缓冲 + 服务间鉴权 X-Internal-Token + 路由: /chat /config /health) + 路由契约文档",
+      "id": "M5",
+      "title": "BFF /api/ai/* 反代: bff 新增 src/app/api/ai/[...path]/route.ts(SSE chunk-by-chunk 透传禁缓冲 + 校验前端 JWT + 附加 X-Internal-Token + 透传 X-User-Id/X-User-Role); src/lib/aiProxy.ts(反代逻辑); .env.example +AI_SERVICE_URL/AI_SERVICE_TOKEN; 接收 AI 服务工具回环的 X-AI-Service 头做审计",
       "wave": 3,
       "subsystem": "bff",
-      "dependsOn": ["T5"],
+      "dependsOn": ["M4"],
       "journey": "J-ai-b-config",
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "BFF 反代单测(SSE 不缓冲/不丢 chunk); X-Internal-Token 校验 401 用例; BFF 覆盖率≥85%; 错误透传对齐"
+      "gate": "BFF 反代单测(SSE 不缓冲/不丢 chunk 逐 chunk 透传); JWT 校验 401 用例; X-Internal-Token 附加断言; X-User-Id 透传断言; bff 覆盖率≥85%; tsc 通过"
     },
     {
-      "id": "T7",
-      "title": "engine AI 面板(B 端运营: 右侧抽屉 AiAssistantPanel.vue + SSE 客户端 @microsoft/fetch-event-source + 消息流/预览/HITL 确认/模型只读展示) + FeatureGate ai_assistant_enabled",
+      "id": "M6",
+      "title": "engine AI 面板迁移: SSE 客户端指向 BFF /api/ai/chat(非直连 AI 服务); useAiChat composable(@microsoft/fetch-event-source); AiAssistantPanel 消息流/预览/HITL 确认/模型只读展示; FeatureGate ai_assistant_enabled; vite proxy 走 BFF",
       "wave": 3,
       "subsystem": "engine",
-      "dependsOn": ["T6"],
+      "dependsOn": ["M5"],
       "journey": "J-ai-b-config",
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "engine AI 面板渲染单测; SSE 客户端单测(mock SSE); FeatureGate 关闭隐藏面板; engine 覆盖率≥85% 不退化; 零 console error"
+      "gate": "engine AI 面板渲染单测; SSE 客户端单测(mock SSE 指向 /api/ai/chat); FeatureGate 关闭隐藏面板; engine 覆盖率≥85% 不退化; 零 console error; pnpm build 通过"
     },
     {
-      "id": "T8",
-      "title": "engine 设置页 AI 模型配置区块(provider/model 下拉 deepseek/glm/qwen + 保存即生效调 BFF PUT /api/settings) + website C 端 AI 助手组件(SSE + RAG 产品问答, ClientOnly 包裹)",
+      "id": "M7",
+      "title": "engine 设置页 AI 模型配置(provider/model 下拉 deepseek/glm/qwen 联动 + temperature + API key 脱敏 + 测试按钮冒烟 + 保存调 BFF PUT /api/settings 复用 luban settings 表) + website C 端 AI 助手组件(SSE + RAG 问答, ClientOnly 包裹, 访客禁工具调用)",
       "wave": 4,
       "subsystem": "cross",
-      "dependsOn": ["T7"],
+      "dependsOn": ["M6"],
       "journey": "J-ai-c-assist",
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "设置页配置单测; 保存→AI 服务 30s 内热切换验证; website C 端组件渲染单测; 多租户隔离用例(A 用户会话 B 不可见)"
+      "gate": "设置页配置单测; API key 脱敏展示断言; 保存→AI 服务 30s 内热切换验证(mock); website C 端组件渲染单测; 多租户隔离(A 会话 B 不可见); tsc 通过"
     },
     {
-      "id": "T9",
-      "title": "联调 + Playwright E2E(绑正式路由 /sites/:siteId/pages/:pageId/edit: 打开AI面板→自然语言→流式→确认→落地可撤销→模型切换; + 多租户隔离 + 三家模型冒烟) + make test-coverage 汇总 + 旧 plan/task 标记 deprecated",
+      "id": "M8",
+      "title": "联调 + Playwright E2E(绑正式路由 /sites/:siteId/pages/:pageId/edit: 打开AI面板→自然语言→流式→工具回环→确认→落地可撤销→模型切换; spec 绑定 @J-ai-b-config @J-ai-model-switch) + website C 端 E2E(@J-ai-c-assist) + 三家模型冒烟 + make test-coverage 汇总(ai/engine/bff≥85%) + 清理临时探查目录 /tmp/ai-repo-*",
       "wave": 5,
       "subsystem": "cross",
-      "dependsOn": ["T7", "T8"],
+      "dependsOn": ["M6", "M7"],
       "journey": "J-ai-b-config",
       "planFile": ".agents/plans/2026-06-28-luban-ai-assistant-2026.md",
-      "gate": "Playwright 主链路全绿无 skip; 三家模型冒烟通过; make test-coverage ai/engine/bff 均≥85%; 旧 plan1/2/program.json status=deprecated; SYSTEM_ARCHITECTURE 已同步"
+      "gate": "Playwright 主链路全绿无 skip; spec 绑定 @J-ai-b-config/@J-ai-model-switch/@J-ai-c-assist(journey-coverage P0 转绿); 三家模型冒烟通过; make test-coverage ai/engine/bff 均≥85%; 临时目录已清理; SYSTEM_ARCHITECTURE 已同步 :8100/Qdrant"
     }
   ]
 }

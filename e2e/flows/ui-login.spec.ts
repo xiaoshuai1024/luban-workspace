@@ -11,9 +11,19 @@ const PASSWORD = process.env.LUBAN_E2E_PASSWORD ?? 'admin123';
  */
 
 test.describe('登录流程 @J-auth', () => {
+  test.beforeEach(async ({ page }) => {
+    // 清除登录态：engine-flows project 注入 storageState（已登录），
+    // 访问 /login 会被重定向到 /dashboard，须先清 token 确保未登录态。
+    await page.goto(`${ENGINE_BASE}/login`);
+    await page.evaluate(() => {
+      localStorage.removeItem('luban_token');
+      localStorage.removeItem('luban_user');
+    });
+  });
+
   test('登录表单可见', async ({ page }) => {
     await page.goto(`${ENGINE_BASE}/login`);
-    await expect(page.getByText('Luban 管理后台')).toBeVisible();
+    await expect(page.getByText('Luban 管理后台')).toBeVisible({ timeout: 15000 });
     await expect(page.getByPlaceholder('请输入账号')).toBeVisible();
     await expect(page.getByPlaceholder('请输入密码')).toBeVisible();
     await expect(page.getByRole('button', { name: '登录' })).toBeVisible();

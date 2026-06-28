@@ -49,6 +49,9 @@ export default defineConfig({
     {
       name: 'engine-flows',
       testDir: './flows',
+      // 排除 ui-* spec：它们由 playwright.ui.config.ts（无 storageState）独立跑，
+      // 避免 engine-flows 注入的登录态导致 /login 被重定向
+      testIgnore: /ui-.*\.spec\.ts/,
       dependencies: ['auth-setup'],
       use: {
         storageState: 'e2e/.auth/engine.json',
