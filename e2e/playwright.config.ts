@@ -13,7 +13,9 @@ import 'dotenv/config';
 const ENGINE_BASE = process.env.LUBAN_E2E_ENGINE_URL ?? 'http://127.0.0.1:5173';
 const WEBSITE_BASE = process.env.LUBAN_E2E_WEBSITE_URL ?? 'http://127.0.0.1:3000';
 const JAVA_API = process.env.LUBAN_E2E_JAVA_API ?? 'http://127.0.0.1:8080';
-const GO_API = process.env.LUBAN_E2E_GO_API ?? 'http://127.0.0.1:8081';
+// @paused: Go 后端已移除（commit e9b0abc），双后端契约测试暂停。
+// 恢复时见 docs/DUAL_BACKEND_PARITY.md，并取消下方 dual-backend project 注释。
+// const GO_API = process.env.LUBAN_E2E_GO_API ?? 'http://127.0.0.1:8081';
 
 export default defineConfig({
   testDir: './',
@@ -47,21 +49,24 @@ export default defineConfig({
     {
       name: 'engine-flows',
       testDir: './flows',
+      // 排除 ui-* spec：它们由 playwright.ui.config.ts（无 storageState）独立跑，
+      // 避免 engine-flows 注入的登录态导致 /login 被重定向
+      testIgnore: /ui-.*\.spec\.ts/,
       dependencies: ['auth-setup'],
       use: {
         storageState: 'e2e/.auth/engine.json',
         // 各 spec 内按需切到 website
       },
     },
-    {
-      name: 'dual-backend',
-      testDir: './contract',
-      testMatch: /dual-backend\.spec\.ts/,
-      dependencies: ['auth-setup'],
-      use: {
-        storageState: 'e2e/.auth/engine.json',
-      },
-    },
+    // @paused: Go 后端已移除，dual-backend 契约测试暂停（commit e9b0abc）。
+    // 恢复 Go 时取消注释并重建 contract/dual-backend.spec.ts。
+    // {
+    //   name: 'dual-backend',
+    //   testDir: './contract',
+    //   testMatch: /dual-backend\.spec\.ts/,
+    //   dependencies: ['auth-setup'],
+    //   use: { storageState: 'e2e/.auth/engine.json' },
+    // },
   ],
 
   // 暴露给 spec 的全局变量
@@ -69,6 +74,5 @@ export default defineConfig({
     ENGINE_BASE,
     WEBSITE_BASE,
     JAVA_API,
-    GO_API,
   },
 });

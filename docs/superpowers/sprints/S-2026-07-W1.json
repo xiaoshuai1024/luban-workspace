@@ -1,0 +1,510 @@
+{
+  "sprintId": "S-2026-07-W1",
+  "name": "2026年7月第1迭代",
+  "goal": "发布闭环 P0 + 线索 MVP E2E 收口",
+  "status": "active",
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-14",
+  "teamCapacity": 40,
+  "createdAt": "2026-06-27T12:38:11.664Z",
+  "startedAt": "2026-06-27T12:38:11.671Z",
+  "completedAt": null,
+  "epics": [
+    {
+      "epicId": "E-mqwcillk",
+      "title": "发布闭环",
+      "description": "发布 API + BFF + UI 端到端",
+      "acceptanceCriteria": [],
+      "storyIds": [],
+      "status": "planned",
+      "journeyRef": "J-publish",
+      "createdAt": "2026-06-27T12:38:11.672Z"
+    },
+    {
+      "epicId": "E-mqwcillm",
+      "title": "线索 MVP",
+      "description": "线索表单收集与流转",
+      "acceptanceCriteria": [],
+      "storyIds": [],
+      "status": "planned",
+      "journeyRef": "J-lead",
+      "createdAt": "2026-06-27T12:38:11.674Z"
+    }
+  ],
+  "stories": [
+    {
+      "storyId": "ST-001",
+      "epicId": "E-mqwcillk",
+      "title": "Flyway 迁移：published_pages 表 + pages.status 白名单 + 回填",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "in_progress",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T1",
+          "subsystem": "backend-java",
+          "titleSnapshot": "Flyway 迁移：published_pages 表 + pages.status 白名单 + 回填"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 1,
+      "tags": [
+        "backend-java"
+      ],
+      "createdAt": "2026-06-27T12:38:11.676Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.704Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-002",
+      "epicId": "E-mqwcillk",
+      "title": "Java Entity + Mapper：PublishedPage 实体 + PageMapper 发布查询",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T2",
+          "subsystem": "backend-java",
+          "titleSnapshot": "Java Entity + Mapper：PublishedPage 实体 + PageMapper 发布查询"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 2,
+      "tags": [
+        "backend-java"
+      ],
+      "createdAt": "2026-06-27T12:38:11.678Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.707Z"
+      },
+      "assignee": "bob"
+    },
+    {
+      "storyId": "ST-003",
+      "epicId": null,
+      "title": "Java Service：PageService.publish/unpublish + PublishedPageService",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "todo",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T3",
+          "subsystem": "backend-java",
+          "titleSnapshot": "Java Service：PageService.publish/unpublish + PublishedPageService"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 3,
+      "tags": [
+        "backend-java"
+      ],
+      "createdAt": "2026-06-27T12:38:11.681Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.702Z"
+      }
+    },
+    {
+      "storyId": "ST-004",
+      "epicId": null,
+      "title": "Java Controller：/publish /unpublish /preview 端点 + status 白名单校验",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T4",
+          "subsystem": "backend-java",
+          "titleSnapshot": "Java Controller：/publish /unpublish /preview 端点 + status 白名单校验"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 4,
+      "tags": [
+        "backend-java"
+      ],
+      "createdAt": "2026-06-27T12:38:11.683Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.683Z"
+      }
+    },
+    {
+      "storyId": "ST-005",
+      "epicId": null,
+      "title": "Java Service：PageVersionService 对接 publish（发布时打 published 快照）",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T5",
+          "subsystem": "backend-java",
+          "titleSnapshot": "Java Service：PageVersionService 对接 publish（发布时打 published 快照）"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 5,
+      "tags": [
+        "backend-java"
+      ],
+      "createdAt": "2026-06-27T12:38:11.684Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.684Z"
+      }
+    },
+    {
+      "storyId": "ST-006",
+      "epicId": null,
+      "title": "BFF：/publish /unpublish /preview 透传端点（apiHandler 风格）",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T6",
+          "subsystem": "bff",
+          "titleSnapshot": "BFF：/publish /unpublish /preview 透传端点（apiHandler 风格）"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 6,
+      "tags": [
+        "bff"
+      ],
+      "createdAt": "2026-06-27T12:38:11.686Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.686Z"
+      }
+    },
+    {
+      "storyId": "ST-007",
+      "epicId": null,
+      "title": "Engine API：page.ts 添加 publishPage/unpublishPage/previewPage",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T7",
+          "subsystem": "engine",
+          "titleSnapshot": "Engine API：page.ts 添加 publishPage/unpublishPage/previewPage"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 7,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-27T12:38:11.688Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.688Z"
+      }
+    },
+    {
+      "storyId": "ST-008",
+      "epicId": null,
+      "title": "Engine UI：PageEditor 发布/预览按钮 + 状态指示",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T8",
+          "subsystem": "engine",
+          "titleSnapshot": "Engine UI：PageEditor 发布/预览按钮 + 状态指示"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 8,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-27T12:38:11.690Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.690Z"
+      }
+    },
+    {
+      "storyId": "ST-009",
+      "epicId": null,
+      "title": "Engine UI：PageList 发布/下线操作 + 状态标签 + 预览按钮修复",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T9",
+          "subsystem": "engine",
+          "titleSnapshot": "Engine UI：PageList 发布/下线操作 + 状态标签 + 预览按钮修复"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 9,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-27T12:38:11.692Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.692Z"
+      }
+    },
+    {
+      "storyId": "ST-010",
+      "epicId": null,
+      "title": "Engine UI：版本历史抽屉（列表 + 回滚）",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T10",
+          "subsystem": "engine",
+          "titleSnapshot": "Engine UI：版本历史抽屉（列表 + 回滚）"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 10,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-27T12:38:11.693Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.693Z"
+      }
+    },
+    {
+      "storyId": "ST-011",
+      "epicId": null,
+      "title": "Engine UI：草稿预览路由 /preview/:pageId",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T11",
+          "subsystem": "engine",
+          "titleSnapshot": "Engine UI：草稿预览路由 /preview/:pageId"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 11,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-27T12:38:11.695Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.695Z"
+      }
+    },
+    {
+      "storyId": "ST-012",
+      "epicId": null,
+      "title": "全链路集成测试：设计→保存→发布→访客可见→下线→不可见",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "publish-loop-p0",
+          "taskId": "T12",
+          "subsystem": "cross",
+          "titleSnapshot": "全链路集成测试：设计→保存→发布→访客可见→下线→不可见"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 12,
+      "tags": [
+        "cross"
+      ],
+      "createdAt": "2026-06-27T12:38:11.697Z",
+      "metadata": {
+        "updatedAt": "2026-06-27T12:38:11.697Z"
+      }
+    }
+  ],
+  "dependencies": [],
+  "comments": [],
+  "activityLog": [
+    {
+      "at": "2026-06-27T12:38:11.707Z",
+      "actor": "agent",
+      "action": "story.updated",
+      "storyId": "ST-002",
+      "detail": "assignee=bob, epicId=E-mqwcillk"
+    },
+    {
+      "at": "2026-06-27T12:38:11.705Z",
+      "actor": "agent",
+      "action": "story.moved",
+      "storyId": "ST-002",
+      "from": "todo",
+      "to": "done"
+    },
+    {
+      "at": "2026-06-27T12:38:11.704Z",
+      "actor": "agent",
+      "action": "story.updated",
+      "storyId": "ST-001",
+      "detail": "assignee=agent, epicId=E-mqwcillk"
+    },
+    {
+      "at": "2026-06-27T12:38:11.703Z",
+      "actor": "agent",
+      "action": "story.moved",
+      "storyId": "ST-001",
+      "from": "todo",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-06-27T12:38:11.702Z",
+      "actor": "agent",
+      "action": "story.moved",
+      "storyId": "ST-003",
+      "from": "backlog",
+      "to": "todo"
+    },
+    {
+      "at": "2026-06-27T12:38:11.701Z",
+      "actor": "agent",
+      "action": "story.moved",
+      "storyId": "ST-002",
+      "from": "backlog",
+      "to": "todo"
+    },
+    {
+      "at": "2026-06-27T12:38:11.700Z",
+      "actor": "agent",
+      "action": "story.moved",
+      "storyId": "ST-001",
+      "from": "backlog",
+      "to": "todo"
+    },
+    {
+      "at": "2026-06-27T12:38:11.697Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-012",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.695Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-011",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.693Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-010",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.692Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-009",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.690Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-008",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.688Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-007",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.686Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-006",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.684Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-005",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.683Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-004",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.681Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-003",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.678Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-002",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.676Z",
+      "actor": "agent",
+      "action": "story.created",
+      "storyId": "ST-001",
+      "to": "backlog"
+    },
+    {
+      "at": "2026-06-27T12:38:11.674Z",
+      "actor": "agent",
+      "action": "epic.created",
+      "detail": "E-mqwcillm 线索 MVP"
+    },
+    {
+      "at": "2026-06-27T12:38:11.672Z",
+      "actor": "agent",
+      "action": "epic.created",
+      "detail": "E-mqwcillk 发布闭环"
+    },
+    {
+      "at": "2026-06-27T12:38:11.671Z",
+      "actor": "agent",
+      "action": "sprint.transition",
+      "from": "planning",
+      "to": "active",
+      "detail": "Sprint S-2026-07-W1: planning→active"
+    },
+    {
+      "at": "2026-06-27T12:38:11.666Z",
+      "actor": "agent",
+      "action": "sprint.created"
+    }
+  ],
+  "retrospective": [],
+  "metadata": {
+    "updatedAt": "2026-06-27T12:38:11.707Z",
+    "createdBy": "agent"
+  }
+}

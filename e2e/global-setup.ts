@@ -11,9 +11,9 @@ import { request } from '@playwright/test';
  */
 
 const JAVA_API = process.env.LUBAN_E2E_JAVA_API ?? 'http://127.0.0.1:8080';
-const GO_API = process.env.LUBAN_E2E_GO_API ?? 'http://127.0.0.1:8081';
 const ENGINE_BASE = process.env.LUBAN_E2E_ENGINE_URL ?? 'http://127.0.0.1:5173';
 const WEBSITE_BASE = process.env.LUBAN_E2E_WEBSITE_URL ?? 'http://127.0.0.1:3000';
+// @paused: Go 后端已移除（commit e9b0abc），探活暂停。
 
 async function probe(url: string, label: string) {
   try {
@@ -32,22 +32,46 @@ async function probe(url: string, label: string) {
   }
 }
 
-/** 可选探活：缺失仅警告（如 Go 后端，单后端模式下不必需） */
+/** 可选探活：缺失仅警告（保留供未来可选依赖复用） */
 async function probeOptional(url: string, label: string) {
   try {
     await probe(url, label);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.log(`[e2e] (可选) ${label} 未起：${(e as Error).message.split('\n')[0]} —— 双后端契约测试将跳过`);
+    console.log(`[e2e] (可选) ${label} 未起：${(e as Error).message.split('\n')[0]}`);
   }
 }
 
 export default async function globalSetup() {
-  // Java/engine/website 必需；Go 可选（双后端契约测试才需）
+  // @paused: Go backend 探活已移除（commit e9b0abc）。恢复时加回 probeOptional(GO_API, 'Go backend')。
+  // Java/engine 必需;website 可选(website 数据问题不阻断 AI 测试,只警告)
   await Promise.all([
     probe(`${JAVA_API}/actuator/health`, 'Java backend'),
-    probeOptional(GO_API, 'Go backend'),
     probe(ENGINE_BASE, 'engine'),
-    probe(WEBSITE_BASE, 'website'),
   ]);
+  // website 探活:失败只警告不阻断(website 既有数据问题非 AI 功能引入)
+  try {
+    await probe(WEBSITE_BASE, 'website');
+  } catch (e) {
+    console.log(`[e2e] 警告: website 不可达(${(e as Error).message.slice(0, 60)}),C 端 UI 测试将跳过`);
+  }
+
+  // 预热 website SSR：Nuxt dev 按需编译，首次访问动态路由（/:site/:path）会触发
+  // DynamicPage 编译，期间可能返回 500。提前访问一次让编译完成，避免后续 spec
+  // 首请求命中编译窗口。prod build 无此问题（已预编译）。
+  await warmupWebsiteSSR();
+}
+
+/** 预热 website 的 DynamicPage 路由编译（仅 dev 模式需要，失败不阻断）。 */
+async function warmupWebsiteSSR() {
+  try {
+    const ctx = await request.newContext({ timeout: 30_000 });
+    // 访问任意 slug/path 触发 DynamicPage 编译（404 也算编译完成）
+    await ctx.get(`${WEBSITE_BASE}/__e2e_warmup__/warmup`, { timeout: 30_000 });
+    await ctx.dispose();
+    // eslint-disable-next-line no-console
+    console.log('[e2e] website SSR 预热完成（DynamicPage 已编译）');
+  } catch {
+    // 预热失败不阻断（prod 模式无需预热）；后续 spec 自行处理
+  }
 }

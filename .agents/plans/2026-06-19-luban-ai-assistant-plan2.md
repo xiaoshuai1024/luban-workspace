@@ -2,7 +2,9 @@
 featureId: luban-ai-assistant-plan2
 title: Luban AI 助手 P2 — 设计稿/截图转页面（多模态）
 createdAt: 2026-06-19
-status: approved
+status: deprecated
+deprecatedReason: 被 .agents/plans/2026-06-28-luban-ai-assistant-2026.md 替代(2026-06-28)。依赖的 plan1 选型过时且未落地;新方案将多模态作为显式延后项(见 2026-06-28 plan §10)。
+supersededBy: luban-ai-assistant-2026
 taskGraph: docs/superpowers/tasks/luban-ai-assistant-plan2.json
 contractSource: plan-template 命令体 + writing-plans SKILL + PLAN_WRITING_CONTRACT.md
 scope: 多模态设计稿转页面能力；复用 P1 的 provider/schema/agent/api/面板基建

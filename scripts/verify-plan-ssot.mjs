@@ -36,11 +36,13 @@ function readJson(p) {
 const [cmd, ...args] = process.argv.slice(2);
 if (cmd === 'validate') {
   process.exit(cmdValidate(args[0]));
+} else if (cmd === 'validate-sprint-refs') {
+  process.exit(cmdValidateSprintRefs());
 } else if (cmd === 'journey-coverage' || cmd === undefined) {
   process.exit(cmdJourneyCoverage());
 } else {
   console.error(`未知命令: ${cmd}`);
-  console.error('用法: verify-plan-ssot.mjs [validate <json> | journey-coverage]');
+  console.error('用法: verify-plan-ssot.mjs [validate <json> | validate-sprint-refs | journey-coverage]');
   process.exit(2);
 }
 
@@ -351,4 +353,67 @@ function printfRowRaw(cells, widths) {
     return c + ' '.repeat(pad);
   });
   console.log('  ' + parts.join('  '));
+}
+
+// ════════════════════════════════════════════════════════
+// validate-sprint-refs
+// 校验所有 task graph 的 task.sprintId 指向有效且状态兼容的 sprint。
+// Sprint MCP 与 task graph 联动的完整性检查。
+// ════════════════════════════════════════════════════════
+function cmdValidateSprintRefs() {
+  const SPRINTS_DIR = join(ROOT, 'docs', 'superpowers', 'sprints');
+  const errors = [];
+  const warnings = [];
+  let checked = 0;
+
+  // 加载所有 sprint（featureId 豁免，仿 journey-registry 模式）
+  const sprintFiles = existsSync(SPRINTS_DIR)
+    ? readdirSync(SPRINTS_DIR).filter((f) => f.endsWith('.json') && f !== 'releases.json')
+    : [];
+  const sprintStatus = new Map();
+  for (const f of sprintFiles) {
+    const data = readJson(join(SPRINTS_DIR, f));
+    if (data?.sprintId) {
+      sprintStatus.set(data.sprintId, data.status ?? 'unknown');
+    }
+  }
+
+  // 扫描所有 task graph 的 task.sprintId
+  if (!existsSync(TASKS_DIR)) {
+    console.log(`${C.Y}无 task graph 目录${C.N}`);
+    return 0;
+  }
+  const taskFiles = readdirSync(TASKS_DIR).filter((f) => f.endsWith('.json'));
+  for (const f of taskFiles) {
+    if (/journey-registry\.json$/.test(f)) continue;
+    const data = readJson(join(ROOT, TASKS_DIR, f));
+    const featureId = data?.featureId ?? f.slice(0, -5);
+    const tasks = Array.isArray(data?.tasks) ? data.tasks : (Array.isArray(data?.children) ? data.children : []);
+    for (const t of tasks) {
+      if (!t?.id || !t?.sprintId) continue;
+      checked++;
+      if (!sprintStatus.has(t.sprintId)) {
+        errors.push(`${featureId}/${t.id}: sprintId "${t.sprintId}" 指向不存在的 sprint 文件`);
+      } else {
+        const status = sprintStatus.get(t.sprintId);
+        if (status === 'cancelled') {
+          warnings.push(`${featureId}/${t.id}: 指向已取消的 sprint "${t.sprintId}"`);
+        }
+      }
+    }
+  }
+
+  console.log(`${C.B}Sprint 引用校验${C.N}: 检查 ${checked} 个引用 · ${sprintStatus.size} 个 sprint`);
+  if (errors.length > 0) {
+    console.log(`${C.R}  ✗ ${errors.length} 个错误${C.N}`);
+    for (const e of errors) console.log(`    ${C.R}${e}${C.N}`);
+  }
+  if (warnings.length > 0) {
+    console.log(`${C.Y}  ! ${warnings.length} 个警告${C.N}`);
+    for (const w of warnings.slice(0, 10)) console.log(`    ${C.Y}${w}${C.N}`);
+  }
+  if (errors.length === 0 && warnings.length === 0) {
+    console.log(`  ${C.G}✓ 全部 sprint 引用有效${C.N}`);
+  }
+  return errors.length > 0 ? 1 : 0;
 }

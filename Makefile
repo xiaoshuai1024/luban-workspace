@@ -16,10 +16,11 @@ PKG_DIRS := packages/engine/luban packages/bff/luban-bff packages/ui/luban-ui pa
             packages/backend/luban-backend
 
 .PHONY: clone-all pull-all push-all pr-all sync-submodules \
-        test test-coverage journey-coverage lint \
+        test test-coverage journey-coverage verify-plan lint \
         dev-engine dev-bff dev-website dev-java dev-apps dev-check \
         install-deps clean \
-        e2e-up e2e-down e2e e2e-cross e2e-install e2e-report
+        e2e-up e2e-down e2e e2e-cross e2e-install e2e-report \
+        sprint-mcp sprint-up sprint-open sprint-status sprint-build sprint-test
 
 # --- E2E 服务编排 + 跨项目流程性 E2E ---
 COMPOSE_E2E := docker-compose.e2e.yml
@@ -143,3 +144,36 @@ dev-check:
 
 clean:
 	@for d in $(PKG_DIRS); do [ -d "$$d" ] && rm -rf $$d/dist $$d/build $$d/target $$d/coverage 2>/dev/null; done; true
+
+# ============================================================
+# Sprint MCP — 敏捷开发全流程（Sprint/Epic/Story/Release/Retro）
+# 详见 packages/sprint-mcp/README.md
+# 数据：docs/superpowers/sprints/*.json + tasks/*.json 的 task.sprintId 反向指针
+# 看板：http://127.0.0.1:7777
+# ============================================================
+
+# 构建 Sprint MCP（tsc，首次或改码后执行）
+sprint-build:
+	cd packages/sprint-mcp && pnpm install && pnpm run build
+
+# 后台启动 Sprint MCP（stdio + HTTP 看板 :7777）
+sprint-up:
+	@SPRINT_MCP_ROOT=$(CURDIR) nohup node packages/sprint-mcp/dist/index.js > /tmp/sprint-mcp.log 2>&1 &
+	@sleep 1.5
+	@curl -s localhost:7777/healthz && echo "" || (echo "启动失败，见 /tmp/sprint-mcp.log" && tail -5 /tmp/sprint-mcp.log)
+
+# 前台启动（阻塞，看日志）
+sprint-mcp:
+	@SPRINT_MCP_ROOT=$(CURDIR) node packages/sprint-mcp/dist/index.js
+
+# 打开看板浏览器
+sprint-open:
+	@open http://127.0.0.1:7777 2>/dev/null || xdg-open http://127.0.0.1:7777 2>/dev/null || echo "看板: http://127.0.0.1:7777"
+
+# 输出当前迭代状态表（供会话/终端快速查看）
+sprint-status:
+	@node scripts/session/sprint-summary.mjs
+
+# Sprint MCP 测试
+sprint-test:
+	cd packages/sprint-mcp && pnpm test

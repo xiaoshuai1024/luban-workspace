@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luban Sprint 看板</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #1f2329; }
+    header { background: #1f2329; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header select, header button { background: #2c3038; color: #fff; border: 1px solid #444; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+    header button:hover { background: #3a3f4a; }
+    .metrics { margin-left: auto; display: flex; gap: 16px; font-size: 13px; color: #bbb; }
+    .metrics b { color: #4fc3f7; }
+    .tabs { padding: 8px 24px; background: #fff; border-bottom: 1px solid #e5e6eb; display: flex; gap: 8px; }
+    .tab { padding: 8px 16px; cursor: pointer; border-radius: 6px 6px 0 0; font-size: 14px; color: #666; }
+    .tab.active { background: #eef2ff; color: #4e6ef2; font-weight: 600; }
+    .board { display: flex; gap: 12px; padding: 16px 24px; overflow-x: auto; min-height: calc(100vh - 120px); }
+    .column { flex: 1 1 220px; min-width: 220px; background: #fff; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .column h3 { font-size: 13px; color: #666; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .column h3 .count { background: #eef0f2; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+    .column.drop-target { background: #f0f7ff; outline: 2px dashed #4e6ef2; }
+    .card { background: #fff; border: 1px solid #e5e6eb; border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: grab; transition: box-shadow .15s; }
+    .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card.dragging { opacity: 0.5; }
+    .card .title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .card .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11px; color: #888; }
+    .badge { padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+    .badge-points { background: #e8f5e9; color: #2e7d32; }
+    .badge-assignee { background: #e3f2fd; color: #1565c0; }
+    .badge-links { background: #fff3e0; color: #e65100; }
+    .badge-blocked { background: #ffebee; color: #c62828; }
+    .empty { color: #ccc; font-size: 12px; text-align: center; padding: 20px 0; }
+    #burndown { padding: 24px; background: #fff; margin: 16px 24px; border-radius: 8px; }
+    #burndownCanvas { max-width: 800px; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1f2329; color: #fff; padding: 10px 16px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .3s; }
+    .toast.show { opacity: 1; }
+    .status-color-backlog { border-left: 3px solid #90a4ae; }
+    .status-color-todo { border-left: 3px solid #78909c; }
+    .status-color-in_progress { border-left: 3px solid #2196f3; }
+    .status-color-review { border-left: 3px solid #9c27b0; }
+    .status-color-testing { border-left: 3px solid #ff9800; }
+    .status-color-done { border-left: 3px solid #4caf50; opacity: 0.75; }
+    .status-color-deferred { border-left: 3px solid #bdbdbd; opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📋 Luban Sprint</h1>
+    <select id="sprintSelect"><option value="">加载中...</option></select>
+    <button onclick="loadSprints()">⟳ 刷新</button>
+    <button onclick="openBurndown()">📊 燃尽图</button>
+    <button onclick="exportMd()">⬇ 导出 MD</button>
+    <div class="metrics" id="metrics"></div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-view="board" onclick="switchView('board')">看板</div>
+    <div class="tab" data-view="backlog" onclick="switchView('backlog')">Backlog</div>
+    <div class="tab" data-view="burndown" onclick="switchView('burndown')">燃尽</div>
+  </div>
+
+  <div id="boardView" class="board"></div>
+  <div id="backlogView" class="board" style="display:none"></div>
+  <div id="burndownView" style="display:none">
+    <div id="burndown"><canvas id="burndownCanvas" width="800" height="400"></canvas></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const COLUMNS = ['backlog', 'todo', 'in_progress', 'review', 'testing', 'done'];
+const COL_LABELS = { backlog:'待排期', todo:'待开始', in_progress:'进行中', review:'评审', testing:'测试', done:'已完成' };
+let currentSprintId = null;
+
+async function api(path, opts) {
+  const res = await fetch('/api' + path, opts);
+  return res.json();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+async function loadSprints() {
+  const data = await api('/sprints');
+  const sel = document.getElementById('sprintSelect');
+  sel.innerHTML = data.sprints.map(s =>
+    `<option value="${s.sprintId}">${s.name} [${s.status}] (${s.doneCount}/${s.storyCount})</option>`
+  ).join('') || '<option value="">（无 sprint，请用 MCP 创建）</option>';
+  if (!currentSprintId && data.sprints.length) {
+    const active = data.sprints.find(s => s.status === 'active');
+    currentSprintId = (active || data.sprints[0]).sprintId;
+  }
+  if (currentSprintId) {
+    sel.value = currentSprintId;
+    await loadBoard();
+  }
+}
+
+async function loadBoard() {
+  if (!currentSprintId) return;
+  const data = await api('/sprints/' + currentSprintId + '/board');
+  const board = data.board;
+  if (!board) return;
+  // 指标
+  document.getElementById('metrics').innerHTML =
+    `<span>📈 <b>${board.doneStories}/${board.totalStories}</b> story</span>` +
+    `<span>⚡ <b>${board.donePoints}/${board.totalPoints}</b> 点</span>` +
+    `<span>状态: <b>${board.status}</b></span>`;
+
+  const container = document.getElementById('boardView');
+  container.innerHTML = board.columns.map(col => {
+    const cards = col.stories.map(s => renderCard(s)).join('') || '<div class="empty">（空）</div>';
+    return `<div class="column" data-status="${col.status}" ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+      <h3>${COL_LABELS[col.status] || col.status} <span class="count">${col.stories.length}</span></h3>
+      ${cards}
+    </div>`;
+  }).join('');
+}
+
+function renderCard(s) {
+  const points = s.storyPoints ? `<span class="badge badge-points">${s.storyPoints}pt</span>` : '';
+  const assignee = s.assignee ? `<span class="badge badge-assignee">@${s.assignee}</span>` : '';
+  const links = s.taskRefs && s.taskRefs.length ? `<span class="badge badge-links">🔗${s.taskRefs.length}</span>` : '';
+  const blocked = s.blockedReason ? `<span class="badge badge-blocked">⛔ ${s.blockedReason}</span>` : '';
+  const id = s.storyId;
+  return `<div class="card status-color-${s.status}" draggable="true" ondragstart="onDragStart(event,'${id}')" data-id="${id}">
+    <div class="title">${escapeHtml(s.title)}</div>
+    <div class="meta"><span class="badge" style="background:#f0f0f0">${id}</span>${points}${assignee}${links}${blocked}</div>
+  </div>`;
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+let draggedStoryId = null;
+function onDragStart(e, id) {
+  draggedStoryId = id;
+  e.target.classList.add('dragging');
+}
+function onDragOver(e) {
+  e.preventDefault();
+  const col = e.target.closest('.column');
+  if (col) col.classList.add('drop-target');
+}
+function onDragLeave(e) {
+  const col = e.target.closest('.column');
+  if (col) col.classList.remove('drop-target');
+}
+async function onDrop(e) {
+  e.preventDefault();
+  const col = e.target.closest('.column');
+  if (!col || !draggedStoryId) return;
+  col.classList.remove('drop-target');
+  const to = col.dataset.status;
+  try {
+    await api('/stories/' + draggedStoryId + '/move', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ sprintId: currentSprintId, to })
+    });
+    toast(`已移至「${COL_LABELS[to] || to}」`);
+    // SSE 会自动触发刷新，兜底手动刷
+    setTimeout(loadBoard, 300);
+  } catch (err) {
+    toast('移动失败: ' + err.message);
+  }
+}
+
+// ── Backlog 视图 ──
+async function loadBacklog() {
+  const data = await api('/backlog');
+  const container = document.getElementById('backlogView');
+  if (!data.backlog || !data.backlog.length) {
+    container.innerHTML = '<div class="empty">Backlog 为空</div>';
+    return;
+  }
+  container.innerHTML = '<div class="column"><h3>待排期 Backlog <span class="count">' + data.count + '</span></h3>' +
+    data.backlog.map(renderCard).join('') + '</div>';
+}
+
+// ── Burndown ──
+async function loadBurndown() {
+  if (!currentSprintId) return;
+  const data = await api('/sprints/' + currentSprintId + '/burndown');
+  drawBurndown(data.burndown);
+}
+
+function drawBurndown(bd) {
+  const canvas = document.getElementById('burndownCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!bd || !bd.points || !bd.points.length) {
+    ctx.fillStyle = '#999';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('无燃尽数据（需 sprint 设置起止日期 + story move 记录）', 40, 200);
+    return;
+  }
+  const W = canvas.width, H = canvas.height, pad = 50;
+  const maxVal = bd.totalPoints;
+  const n = bd.points.length;
+  const xAt = i => pad + (i / Math.max(1, n - 1)) * (W - 2 * pad);
+  const yAt = v => H - pad - (v / Math.max(1, maxVal)) * (H - 2 * pad);
+
+  // 坐标轴
+  ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, H - pad); ctx.lineTo(W - pad, H - pad); ctx.stroke();
+  ctx.fillStyle = '#666'; ctx.font = '11px sans-serif';
+  ctx.fillText('剩余点数', pad - 35, pad - 5);
+  ctx.fillText('日期', W - pad - 20, H - pad + 30);
+
+  // 理想线（虚线）
+  ctx.strokeStyle = '#999'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  bd.points.forEach((p, i) => { const x = xAt(i), y = yAt(p.ideal); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // 实际线
+  const color = bd.status === 'on_track' ? '#4caf50' : bd.status === 'at_risk' ? '#ff9800' : '#f44336';
+  ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath();
+  bd.points.forEach((p, i) => {
+    if (p.actual === null || p.actual === undefined) return;
+    const x = xAt(i), y = yAt(p.actual);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // 点
+  ctx.fillStyle = color;
+  bd.points.forEach((p, i) => {
+    if (p.actual === null || p.actual === undefined) return;
+    ctx.beginPath(); ctx.arc(xAt(i), yAt(p.actual), 3, 0, 2 * Math.PI); ctx.fill();
+  });
+
+  // 图例
+  ctx.font = '12px sans-serif';
+  ctx.fillStyle = '#999'; ctx.fillText('--- 理想', W - pad - 80, pad + 5);
+  ctx.fillStyle = color; ctx.fillText('── 实际 (' + bd.status + ')', W - pad - 80, pad + 22);
+}
+
+// ── 视图切换 ──
+function switchView(view) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  ['board','backlog','burndown'].forEach(v => {
+    document.getElementById(v + 'View').style.display = v === view ? '' : 'none';
+  });
+  if (view === 'backlog') loadBacklog();
+  if (view === 'burndown') loadBurndown();
+}
+
+function openBurndown() { switchView('burndown'); }
+
+async function exportMd() {
+  if (!currentSprintId) return;
+  const data = await api('/sprints/' + currentSprintId + '/board');
+  const lines = ['# Sprint 看板导出\n\n| StoryID | 标题 | 状态 | 点数 | 负责人 | 链接 |\n|---|---|---|---|---|---|'];
+  for (const col of data.board.columns) {
+    for (const s of col.stories) {
+      const links = (s.taskRefs||[]).map(r => r.featureId + '/' + r.taskId).join(' ');
+      lines.push(`| ${s.storyId} | ${s.title} | ${s.status} | ${s.storyPoints} | ${s.assignee||'-'} | ${links} |`);
+    }
+  }
+  const blob = new Blob([lines.join('\n')], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sprint-${currentSprintId}.md`;
+  a.click();
+  toast('已导出 Markdown');
+}
+
+// ── SSE 实时刷新 ──
+function initSSE() {
+  const es = new EventSource('/api/events');
+  es.addEventListener('change', () => {
+    loadSprints();
+  });
+  es.onerror = () => { /* 自动重连 */ };
+}
+
+// sprint 切换
+document.getElementById('sprintSelect').addEventListener('change', e => {
+  currentSprintId = e.target.value;
+  loadBoard();
+});
+
+// 启动
+loadSprints();
+initSSE();
+</script>
+</body>
+</html>

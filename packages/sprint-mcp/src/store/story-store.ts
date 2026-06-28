@@ -14,7 +14,7 @@ const NOW = () => new Date().toISOString();
 
 /** Story 状态流转规则（敏捷看板列）*/
 const STORY_TRANSITIONS: Record<StoryStatus, StoryStatus[]> = {
-  backlog: ['todo'],
+  backlog: ['todo', 'in_progress'],
   todo: ['in_progress', 'backlog', 'deferred', 'done'],
   in_progress: ['review', 'testing', 'done', 'todo', 'deferred'],
   review: ['testing', 'done', 'in_progress', 'todo'],

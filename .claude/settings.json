@@ -22,7 +22,11 @@
       "Bash(go test*)",
       "Bash(go build*)",
       "Bash(node scripts/*.mjs *)",
-      "Bash(node scripts/session/*.mjs)"
+      "Bash(node scripts/session/*.mjs)",
+      "Bash(node packages/sprint-mcp/*)",
+      "Bash(node packages/sprint-mcp/dist/*)",
+      "Bash(make sprint-*)",
+      "Bash(curl localhost:77*)"
     ],
     "deny": [
       "Bash(git push * master*)",
@@ -38,6 +42,10 @@
           {
             "type": "command",
             "command": "node scripts/session/in-progress-summary.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node scripts/session/sprint-summary.mjs"
           }
         ]
       }

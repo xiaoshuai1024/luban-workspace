@@ -1,0 +1,249 @@
+{
+  "featureId": "app-deeplink-backend-arch",
+  "title": "App 深链寻址 + 后端架构分层（运营/C 端隔离 + 聚合根 + 短链系统）",
+  "planPath": "docs/superpowers/plans/2026-06-28-app-deeplink-backend-arch.md",
+  "$scope": "后端 Java 包重构(publicside/operatorside/shared) + 聚合根(Site/Page/Form/Lead/Campaign/Channel) + 完整短链系统(channel 表 + GET /:shortCode 302 + 运营端 CRUD) + App 寻址壳层(scheme/Universal Link 解析→拉 page schema→渲染/兜底页) + 放弃 Go 双后端战略并更新文档",
+  "$decisions": "Q1=B(一份大 plan) Q2=A+B(物理隔离+全量聚合根) Q3=C(完整短链) Q4=C(放弃双后端,更新文档) Q5=A(仅短链/schema 打开,直接打开=兜底页) Q6=b(完整短链本期建)",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Java 包重构：建立 publicside/operatorside/shared 三模块包骨架",
+      "status": "pending",
+      "dependsOn": [],
+      "group": "A",
+      "subsystem": "backend-java",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T2",
+      "title": "拆分跨界 Service：AbService/FeatureGateService/AnalyticsEventService 各拆为 publicside 读模型 + operatorside 管理模型",
+      "status": "pending",
+      "dependsOn": ["T1"],
+      "group": "A",
+      "subsystem": "backend-java",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T3",
+      "title": "解除 C 端对运营侧依赖：AnalyticsEventService(public) 不再依赖 LeadCryptoService；下沉加密原语到 shared",
+      "status": "pending",
+      "dependsOn": ["T2"],
+      "group": "A",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T4",
+      "title": "迁移所有 controller/entity/mapper/dto 到对应模块包(publicside/operatorside/shared)",
+      "status": "pending",
+      "dependsOn": ["T1"],
+      "group": "A",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T5",
+      "title": "ArchUnit 新增隔离规则：publicside 不得依赖 operatorside；shared 双向可依赖；强化 entity 纯 POJO",
+      "status": "pending",
+      "dependsOn": ["T4"],
+      "group": "A",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T6",
+      "title": "聚合根 Site 实现：封装 Page/Form/Lead invariant，PageSchema 落库/版本/发布一致性",
+      "status": "pending",
+      "dependsOn": ["T5"],
+      "group": "B",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T7",
+      "title": "聚合根 Campaign/Channel 实现：封装渠道-短链-目标页 invariant 与 UTM 模板",
+      "status": "pending",
+      "dependsOn": ["T5"],
+      "group": "B",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T8",
+      "title": "重构 SiteService.delete 手写级联为聚合根事务边界（事务回归测试守护）—— Site 聚合先行，Campaign/Channel 聚合（T7）并行不阻塞 T8",
+      "status": "pending",
+      "dependsOn": ["T6"],
+      "group": "B",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T9",
+      "title": "ArchUnit 聚合根规则：聚合外禁止直接持有聚合内实体引用；聚合内 mapper 仅经聚合根访问",
+      "status": "pending",
+      "dependsOn": ["T6", "T7"],
+      "group": "B",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T10",
+      "title": "Flyway: channel 表 migration（short_url/target_page_id/utm_template/uk_short_url/uk_site_code，对齐 07-data-model.md）",
+      "status": "pending",
+      "dependsOn": ["T7"],
+      "group": "C",
+      "subsystem": "backend-java",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T11",
+      "title": "Flyway: campaign 表 migration（site_id/name/status/时间窗，对齐 07-data-model.md）",
+      "status": "pending",
+      "dependsOn": ["T7"],
+      "group": "C",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T12",
+      "title": "后端 operatorside: ChannelController + ChannelService（CRUD + 短码生成 + QR 占位）",
+      "status": "pending",
+      "dependsOn": ["T10"],
+      "group": "C",
+      "subsystem": "backend-java",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T13",
+      "title": "后端 operatorside: CampaignController + CampaignService（CRUD + 关联 channel）",
+      "status": "pending",
+      "dependsOn": ["T11"],
+      "group": "C",
+      "subsystem": "backend-java"
+    },
+    {
+      "id": "T14",
+      "title": "后端 publicside: GET /public/short/:shortCode 解析 channel→target page schema（302 元数据 + JSON 体，供 BFF/App 决策）",
+      "status": "pending",
+      "dependsOn": ["T10", "T12"],
+      "group": "C",
+      "subsystem": "backend-java",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T15",
+      "title": "BFF: GET /:shortCode 302 重定向路由（查 channel→website page URL，附 ?channel=code&utm_*）",
+      "status": "pending",
+      "dependsOn": ["T14"],
+      "group": "C",
+      "subsystem": "bff",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T16",
+      "title": "BFF: GET /api/channels + POST /api/channels 渠道/短链管理（用户鉴权）薄代理",
+      "status": "pending",
+      "dependsOn": ["T12"],
+      "group": "C",
+      "subsystem": "bff",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T17",
+      "title": "BFF: GET /api/campaigns + POST /api/campaigns 活动管理薄代理",
+      "status": "pending",
+      "dependsOn": ["T13"],
+      "group": "C",
+      "subsystem": "bff"
+    },
+    {
+      "id": "T18",
+      "title": "Client(Flutter): 工程骨架 pubspec.yaml + main.dart + 路由壳 + 环境配置",
+      "status": "pending",
+      "dependsOn": ["T15"],
+      "group": "D",
+      "subsystem": "client",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T19",
+      "title": "Client(Flutter): app_links 接收 Universal Link + uni_links 接收 scheme，解析出 shortCode/siteSlug/path",
+      "status": "pending",
+      "dependsOn": ["T18"],
+      "group": "D",
+      "subsystem": "client",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T20",
+      "title": "Client(Flutter): 深链解析服务 — shortCode→调 BFF /:shortCode 或直调后端 /public/short/:code 取 page schema",
+      "status": "pending",
+      "dependsOn": ["T19", "T15"],
+      "group": "D",
+      "subsystem": "client",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T21",
+      "title": "Client(Flutter): 兜底页（直接打开 App 无深链参数时展示，不展示任何站点列表）",
+      "status": "pending",
+      "dependsOn": ["T18"],
+      "group": "D",
+      "subsystem": "client",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T22",
+      "title": "Client(Flutter): page schema JSON 拉取 + 文本渲染器 TextRenderer（真实渲染 Heading/Text 节点为可读文本，未知类型诚实降级提示；完整物料渲染器延后独立 plan）",
+      "status": "pending",
+      "dependsOn": ["T20"],
+      "group": "D",
+      "subsystem": "client"
+    },
+    {
+      "id": "T23",
+      "title": "放弃双后端战略：更新 DUAL_BACKEND_PARITY.md/SYSTEM_ARCHITECTURE.md/AGENTS.md/06-bff-strategy.md/luban-dual-backend-parity.md；清理 DualBackendContractTest.java(@Disabled 或删除) + contract-check.sh + e2e-cross.yml（否则 T26 mvn verify 红）",
+      "status": "pending",
+      "dependsOn": [],
+      "group": "E",
+      "subsystem": "cross"
+    },
+    {
+      "id": "T24",
+      "title": "E2E(website 侧): 短链重定向契约测试 — GET /:shortCode 返回 302 + 目标 URL + channel/utm 参数",
+      "status": "pending",
+      "dependsOn": ["T15"],
+      "group": "F",
+      "subsystem": "web",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T25",
+      "title": "E2E(website 侧): 短链→website 渲染闭环 — 302 落地后 website 按 site+path 渲染 published schema",
+      "status": "pending",
+      "dependsOn": ["T24"],
+      "group": "F",
+      "subsystem": "web",
+      "journey": "J-deeplink"
+    },
+    {
+      "id": "T26",
+      "title": "门禁汇总：mvn verify(Java 80%) + pnpm test(BFF 85%) + ArchUnit + journey-coverage P0=100%",
+      "status": "pending",
+      "dependsOn": ["T9", "T22", "T25"],
+      "group": "G",
+      "subsystem": "cross"
+    }
+  ],
+  "journeys": [
+    {
+      "id": "J-deeplink",
+      "title": "深链/短链打开站点页面",
+      "priority": "P2",
+      "status": "planned",
+      "note": "降级 P0→P2：功能未实现，不应阻断全局 journey-coverage 门禁。功能落地后升回 P0。",
+      "scenarios": [
+        "运营创建 channel(短码+目标页+UTM 模板)",
+        "访客点击短链 → BFF GET /:shortCode → 302 到 website 页面 URL(附 channel/utm)",
+        "website 按 site+path 渲染 published schema",
+        "App 收到 Universal Link/scheme → 解析 shortCode → 拉 page schema → 渲染",
+        "App 直接打开(无深链参数) → 展示兜底页(不展示站点)",
+        "短码不存在 → 明确错误态(非静默 200)"
+      ],
+      "entrySubsystem": "website",
+      "status": "declared"
+    }
+  ]
+}
