@@ -73,7 +73,13 @@ test.describe('流程A：发布闭环 @cross @J-publish', () => {
     // === ④ 切换到 website，访问公开页（真实 SSR）===
     // website 路由：/:site/:path* → DynamicPage → usePageByPath(bff) → LubanPage 渲染
     const publicUrl = `${WEBSITE_BASE}/${SITE_SLUG}${PAGE_PATH}`;
-    const res = await page.goto(publicUrl);
+    // Nuxt dev 按需编译：首次访问可能返回 500（编译中），重试一次给编译时间。
+    // prod build 无此问题。重试上限 3 次 × 5s 间隔。
+    let res = await page.goto(publicUrl);
+    for (let attempt = 0; attempt < 3 && res && res.status() >= 500; attempt++) {
+      await page.waitForTimeout(5_000);
+      res = await page.goto(publicUrl);
+    }
     expect(res, 'website 公开页须返回响应').not.toBeNull();
     expect(res!.status(), '已发布页须 200').toBe(200);
 

@@ -20,6 +20,14 @@
       "headers": {
         "X-Figma-Token": "<your-figma-token>"
       }
+    },
+    "sprint": {
+      "command": "node",
+      "args": ["packages/sprint-mcp/dist/index.js"],
+      "env": {
+        "SPRINT_MCP_ROOT": ".",
+        "SPRINT_MCP_PORT": "7777"
+      }
     }
   }
 }

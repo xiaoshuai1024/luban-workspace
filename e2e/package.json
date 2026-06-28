@@ -9,8 +9,8 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:engine": "playwright test --project=engine-flows",
-    "test:contract": "playwright test --project=dual-backend",
-    "test:cross": "playwright test --project=engine-flows --project=dual-backend",
+    "@paused test:contract": "echo '@paused Go 后端已移除（commit e9b0abc），双后端契约测试暂停'",
+    "@paused test:cross": "echo '@paused Go 后端已移除，test:cross 退化为 test:engine'",
     "report": "playwright show-report"
   },
   "devDependencies": {

@@ -107,6 +107,7 @@ luban-workspace/                  # meta 仓
 `/prod-debug` `/prod-testing` — 生产调试/测试
 `/prd` `/effort` `/write-ex` `/feishu-doc` — 辅助
 `/pua` — 大厂 PUA 话术驱动 AI 穷尽方案再放弃（源自 [tanweai/pua](https://github.com/tanweai/pua)，本地化于 `.agents/skills/pua/`）
+`/sprint-plan` `/sprint-import <featureId>` `/sprint-status` — 敏捷开发全流程（Sprint MCP，22 个 tool + HTTP 看板 :7777，与 `/plan-template` 任务图联动；`make sprint-up` 启动）
 
 ---
 

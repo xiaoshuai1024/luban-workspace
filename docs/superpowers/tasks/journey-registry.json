@@ -49,6 +49,16 @@
 
     { "id": "J-cms-collection", "title": "CMS 集合渲染", "priority": "P2", "entrySubsystem": "website", "scenarios": ["cmsBinding 节点拉取集合数据", "集合 items 渲染"], "status": "covered", "note": "cms-collection（C1 items数组结构/C2 不存在collection容错）" },
 
-    { "id": "J-billing", "title": "套餐与用量", "priority": "P2", "entrySubsystem": "engine", "scenarios": ["套餐列表（free/starter/growth）", "用量面板"], "status": "covered", "note": "billing（B1 三档套餐/B2 用量查询）；engine UI 用量面板为后续增强点" }
+    { "id": "J-billing", "title": "套餐与用量", "priority": "P2", "entrySubsystem": "engine", "scenarios": ["套餐列表（free/starter/growth）", "用量面板"], "status": "covered", "note": "billing（B1 三档套餐/B2 用量查询）；engine UI 用量面板为后续增强点" },
+
+    { "id": "J-collab", "title": "实时协作 CRDT（多人在线/远程光标/y-websocket）", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["双浏览器打开同 page 内容实时同步", "在线用户列表可见", "canAccessRoom 防越权 IDOR（403）", "ws 鉴权（无 token→401）"], "status": "covered", "note": "collab-contract（ws 鉴权/在线用户/IDOR）；UI 接线见 T22（useCollab→PageEditor）" },
+
+    { "id": "J-quota-enforcement", "title": "用量上报→套餐超限拦截", "priority": "P0", "entrySubsystem": "website", "scenarios": ["访客超额提交表单被 429", "engine 用量面板进度条更新", "超 plan quota 拦截 + 友好错误体"], "status": "covered", "note": "quota-enforcement（超额 429/用量更新）" },
+
+    { "id": "J-datasource", "title": "数据源管理（CRUD/test/query）", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["数据源 CRUD（static/api）", "连接 test（返回 ok/message/latencyMs）", "query 查询（SSRF 防护）", "headers 脱敏展示"], "status": "covered", "note": "datasource-api + DatasourceManageDialog（T23）" },
+
+    { "id": "J-form-crud", "title": "表单管理（FormList/FormEditor + dedup/antiSpam）", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["表单列表", "新建/编辑（name/pageId/dedupPolicy/dedupKeys）", "删除（有线索时 409 FORM_HAS_LEADS 级联校验）", "dedup 4 策略（reject/mark/overwrite/merge）"], "status": "covered", "note": "form-api + FormList/FormEditor（T24）；DELETE 端点 Java+BFF+engine 三端" },
+
+    { "id": "J-contract-parity", "title": "Java 后端契约自洽（单端契约测试，Go 暂停）", "priority": "P2", "entrySubsystem": "workspace", "scenarios": ["UserPassword/PublicPage/SlugConflict/Datasource/AuthMe 契约一致性"], "status": "covered", "note": "Java 仓 src/test/.../contract/*.java；Go @paused（commit e9b0abc）" }
   ]
 }
