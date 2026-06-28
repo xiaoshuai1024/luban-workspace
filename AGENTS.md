@@ -131,6 +131,16 @@ luban-workspace/                  # meta 仓
 
 > 已废弃：早期配置的 memory MCP（`@modelcontextprotocol/server-memory`，D:/ 路径）已移除——知识图谱 JSONL 不进 git、与你"完成任务时间线"的需求不匹配。记忆统一走 task 图 JSON + rules 文件，皆 version-controlled。
 
+### 会话记忆闭环（MUST）
+
+进度记忆**只存 SSOT，不靠对话**。完成/阻塞任何任务后：
+
+1. 更新 `docs/superpowers/tasks/<featureId>.json` 对应 task 的 `status`（`in_progress`/`done`/`blocked`+`blockedReason`）与 `metadata.updatedAt`；
+2. 下一会话 SessionStart hook 会自动读出——无需手动汇报"上次做到哪"；
+3. 经验类教训（"不要再犯"）：先落对应 rule 文件 `.agents/rules/*.md`，成熟后由 `self-improve.md` 机制升级。
+
+> 已废弃：早期配置的 memory MCP（`@modelcontextprotocol/server-memory`，D:/ 路径）已移除——知识图谱 JSONL 不进 git、与你"完成任务时间线"的需求不匹配。记忆统一走 task 图 JSON + rules 文件，皆 version-controlled。
+
 ---
 
 ## 规范演进
