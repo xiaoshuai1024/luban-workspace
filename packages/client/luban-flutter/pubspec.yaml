@@ -26,6 +26,10 @@ dev_dependencies:
   # integration_test for deeplink E2E (T19/T20/T21/T22)
   integration_test:
     sdk: flutter
+  # mock HTTP for resolver unit tests（app-deeplink-backend-arch 测试框架）
+  http_mock_adapter: ^0.6.1
+  # coverage 门禁
+  test_cov_console: ^0.2.2
 
 flutter:
   uses-material-design: true
