@@ -83,19 +83,14 @@ test.describe('Website SSR 深度 @J-ssr', () => {
     expect(html).toMatch(/__nuxt|__NUXT__/i);
   });
 
-  test('SSR3: 不存在路径 — 软 404 现状记录（website 既有技术债）', async () => {
+  test('SSR3: 硬 404 — 不存在路径返回 HTTP 404', async () => {
     const r = await apiCtx.get(`${WEBSITE_BASE}/${siteSlug}/__non_existent_path__`);
-    // 已知技术债：website 对不存在路径返回 200（软 404），journey-registry 声明应硬 404
-    // 此测试记录现状，待 website 修复后改为断言 404
-    const html = await r.text();
-    // 软 404 至少应渲染错误提示（非正常页面内容）
-    expect(html).toMatch(/not found|404|error|页面/i);
+    expect(r.status(), `不存在路径应返回 404，实际 ${r.status()}`).toBe(404);
   });
 
-  test('SSR4: 不存在 slug — 软 404 现状记录', async () => {
+  test('SSR4: 硬 404 — 不存在 slug 返回 404', async () => {
     const r = await apiCtx.get(`${WEBSITE_BASE}/__non_existent_slug__/any`);
-    const html = await r.text();
-    expect(html).toMatch(/not found|404|error|页面/i);
+    expect(r.status(), `不存在 slug 应返回 404，实际 ${r.status()}`).toBe(404);
   });
 
   test('SSR5: 公开 by-path 端点返回发布页', async () => {
