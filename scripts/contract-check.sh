@@ -1,6 +1,3 @@
 #!/usr/bin/env bash
-# Java/Go 双后端契约一致性检查（TODO）
-# 目标：基于 OpenAPI 契约比对 luban-backend 与 luban-backend-go 的响应体/错误码/状态机
-set -euo pipefail
-echo "[stub] contract-check: TODO — 实现双后端 API 契约比对"
-echo "       参考 docs/DUAL_BACKEND_PARITY.md"
+# 已废弃（Q4=C 放弃 Go 双后端，2026-06-28）。Java 为单端权威，无契约比对需求。
+exit 0

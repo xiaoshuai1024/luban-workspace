@@ -1,10 +1,12 @@
 <!--
-description: Java/Go 双后端同接口行为一致（响应体/错误码/状态机）
+description: Java/Go 双后端同接口行为一致（响应体/错误码/状态机）— 已废弃
 globs: packages/backend/**, packages/bff/**
 alwaysApply: false
 -->
 
-# Java / Go 双后端契约对齐（MUST）
+> ⚠️ **已废弃（Q4=C 放弃 Go 双后端，2026-06-28）。Java 为单端权威。本规则正文保留作历史归档，不再具有约束力。**
+
+# Java / Go 双后端契约对齐（MUST · 已废弃）
 
 luban 后端是**同一业务的双实现**：`packages/backend/luban-backend`（Java / Spring Boot）与 `packages/backend/luban-backend-go`（Go）。两者必须满足**行为一致契约**。
 

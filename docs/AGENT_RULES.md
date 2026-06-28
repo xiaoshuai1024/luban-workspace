@@ -94,16 +94,9 @@
 
 ---
 
-## 6. 后端规则（Go — `packages/backend/luban-backend-go`）
+## 6. 后端规则（Go — 已废弃）
 
-luban 的 Go 后端与 Java 后端是**同一业务的双实现**，必须满足**行为一致契约**。
-
-- **本地运行**：修改 `packages/backend/luban-backend-go/` 后，须重启 Go 服务（`go run` 或等价命令）
-- **接口契约**：与 Java 端**完全一致**（路径、参数、响应体、错误码、状态机），详见 [`docs/DUAL_BACKEND_PARITY.md`](./DUAL_BACKEND_PARITY.md)
-- **同步变更（MUST）**：改 Java 端的接口契约必须同步改 Go 端（反之亦然）；同一 PR 内完成两端改动
-- **包管理**：Go 仓用 `go mod`
-- **测试**：`go test ./... -race -cover`，覆盖率 75%
-- **日志**：与 Java 端日志规范对齐（结构化、requestId 关联、PII 脱敏）
+> ⚠️ **已废弃（Q4=C 放弃 Go 双后端，2026-06-28）。Java 为单端权威。** 本节原描述 Go 后端规则，现已失效，保留编号占位。后端规则统一见 §5（后端规则 Java）。详见 `docs/DUAL_BACKEND_PARITY.md` 历史归档。
 
 ---
 

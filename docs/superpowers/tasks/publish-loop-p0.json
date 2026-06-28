@@ -2,7 +2,7 @@
   "featureId": "publish-loop-p0",
   "title": "P0 发布闭环：草稿/发布分离 + 发布/下线/预览 + 版本历史前端",
   "createdAt": "2026-06-26",
-  "status": "draft",
+  "status": "done",
   "journeys": [
     {
       "id": "J-publish",
@@ -13,111 +13,148 @@
     {
       "id": "T1",
       "title": "Flyway 迁移：published_pages 表 + pages.status 白名单 + 回填",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
       "dependsOn": [],
       "group": "backend-java",
-      "verification": "mvn -q test -Dtest=PublishMigrationTest"
+      "verification": "mvn -q test -Dtest=PublishMigrationTest",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T2",
       "title": "Java Entity + Mapper：PublishedPage 实体 + PageMapper 发布查询",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
-      "verification": "mvn -q compile"
+      "verification": "mvn -q compile",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T3",
       "title": "Java Service：PageService.publish/unpublish + PublishedPageService",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T2"],
+      "dependsOn": [
+        "T2"
+      ],
       "group": "backend-java",
-      "verification": "mvn -q test -Dtest=PagePublishServiceTest"
+      "verification": "mvn -q test -Dtest=PagePublishServiceTest",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T4",
       "title": "Java Controller：/publish /unpublish /preview 端点 + status 白名单校验",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T3"],
+      "dependsOn": [
+        "T3"
+      ],
       "group": "backend-java",
-      "verification": "mvn -q test -Dtest=PagePublishControllerTest"
+      "verification": "mvn -q test -Dtest=PagePublishControllerTest",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T5",
       "title": "Java Service：PageVersionService 对接 publish（发布时打 published 快照）",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T3"],
+      "dependsOn": [
+        "T3"
+      ],
       "group": "backend-java",
-      "verification": "mvn -q test -Dtest=PageVersionPublishTest"
+      "verification": "mvn -q test -Dtest=PageVersionPublishTest",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T6",
       "title": "BFF：/publish /unpublish /preview 透传端点（apiHandler 风格）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T4"],
+      "dependsOn": [
+        "T4"
+      ],
       "group": "bff",
-      "verification": "pnpm run build"
+      "verification": "pnpm run build",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T7",
       "title": "Engine API：page.ts 添加 publishPage/unpublishPage/previewPage",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T6"],
+      "dependsOn": [
+        "T6"
+      ],
       "group": "engine",
-      "verification": "pnpm run lint"
+      "verification": "pnpm run lint",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T8",
       "title": "Engine UI：PageEditor 发布/预览按钮 + 状态指示",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T7"],
+      "dependsOn": [
+        "T7"
+      ],
       "group": "engine",
-      "verification": "pnpm run build"
+      "verification": "pnpm run build",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T9",
       "title": "Engine UI：PageList 发布/下线操作 + 状态标签 + 预览按钮修复",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T7"],
+      "dependsOn": [
+        "T7"
+      ],
       "group": "engine",
-      "verification": "pnpm run build"
+      "verification": "pnpm run build",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T10",
       "title": "Engine UI：版本历史抽屉（列表 + 回滚）",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T7"],
+      "dependsOn": [
+        "T7"
+      ],
       "group": "engine",
-      "verification": "pnpm run build"
+      "verification": "pnpm run build",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T11",
       "title": "Engine UI：草稿预览路由 /preview/:pageId",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T8"],
+      "dependsOn": [
+        "T8"
+      ],
       "group": "engine",
-      "verification": "pnpm run build"
+      "verification": "pnpm run build",
+      "sprintId": "S-2026-07-W1"
     },
     {
       "id": "T12",
       "title": "全链路集成测试：设计→保存→发布→访客可见→下线→不可见",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T4", "T6", "T9", "T11"],
+      "dependsOn": [
+        "T4",
+        "T6",
+        "T9",
+        "T11"
+      ],
       "group": "cross",
       "journey": "J-publish-detail",
-      "verification": "mvn -q test -Dtest=PublishLoopIT"
+      "verification": "mvn -q test -Dtest=PublishLoopIT",
+      "sprintId": "S-2026-07-W1"
     }
   ]
 }

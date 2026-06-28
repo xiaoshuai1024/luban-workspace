@@ -4,35 +4,240 @@
   "plan": "../../docs/superpowers/plans/2026-06-15-lead-capture-mvp.md",
   "notes": "校验脚本 scripts/verify-plan-ssot.mjs 为 stub，JSON 合规性人工保证",
   "tasks": [
-    { "id": "T-be-1", "group": "backend-java", "wave": 1, "title": "schema.sql 增 forms/leads 表 (UUID, IF NOT EXISTS)", "dependsOn": [], "status": "todo" },
-    { "id": "T-be-2", "group": "backend-java", "wave": 1, "title": "Form/Lead 领域: entity/mapper/service/controller + dto", "dependsOn": ["T-be-1"], "status": "todo" },
-    { "id": "T-be-4", "group": "backend-java", "wave": 1, "title": "DedupService: dedup_hash + policy", "dependsOn": ["T-be-2"], "status": "todo" },
-    { "id": "T-be-5", "group": "backend-java", "wave": 1, "title": "AntiSpamService: Redis 滑动窗口频控 + 验证码校验", "dependsOn": ["T-be-2"], "status": "todo" },
-    { "id": "T-be-7", "group": "backend-java", "wave": 1, "title": "LeadSecurityConfig: AES 加密(phone/email) + 日志脱敏 + 错误码", "dependsOn": ["T-be-2"], "status": "todo" },
-    { "id": "T-be-6", "group": "backend-java", "wave": 1, "title": "LeadNotifyService: Webhook 异步通知 + 重试", "dependsOn": ["T-be-2"], "status": "todo" },
-    { "id": "T-be-3", "group": "backend-java", "wave": 2, "title": "PublicLeadController: POST /backend/lead/forms/:id/submit", "dependsOn": ["T-be-2", "T-be-4", "T-be-5", "T-be-7"], "status": "todo" },
-
-    { "id": "T-ui-1", "group": "ui", "wave": 1, "title": "确认 luban-low-code registry LubanForm 注册 + 提交事件", "dependsOn": [], "status": "todo" },
-    { "id": "T-ui-2", "group": "ui", "wave": 1, "title": "formSubmit 运行时 + submitConfig schema (向后兼容)", "dependsOn": ["T-ui-1"], "status": "todo" },
-
-    { "id": "T-bff-1", "group": "bff", "wave": 2, "title": "forms routes: GET list/POST/GET/PATCH", "dependsOn": ["T-be-2"], "status": "todo" },
-    { "id": "T-bff-2", "group": "bff", "wave": 2, "title": "leads routes: list/detail/status/export", "dependsOn": ["T-be-2"], "status": "todo" },
-    { "id": "T-bff-4", "group": "bff", "wave": 2, "title": "antiSpam lib (BFF 前置频控)", "dependsOn": [], "status": "todo" },
-    { "id": "T-bff-3", "group": "bff", "wave": 3, "title": "forms/[id]/submit route (公开留资)", "dependsOn": ["T-be-3", "T-bff-4"], "status": "todo" },
-
-    { "id": "T-eng-1", "group": "engine", "wave": 2, "title": "api/lead.ts + api/form.ts", "dependsOn": ["T-bff-1", "T-bff-2"], "status": "todo" },
-    { "id": "T-eng-2", "group": "engine", "wave": 2, "title": "LeadList + LeadDetail 视图 + 路由 + 菜单", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-eng-3", "group": "engine", "wave": 3, "title": "PageEditor 表单配置面板", "dependsOn": ["T-ui-2", "T-eng-1"], "status": "todo" },
-
-    { "id": "T-web-1", "group": "website", "wave": 3, "title": "composables/useLeadSubmit + utm 解析", "dependsOn": ["T-bff-3"], "status": "todo" },
-    { "id": "T-web-2", "group": "website", "wave": 3, "title": "渲染端接入表单提交 + 成功态", "dependsOn": ["T-web-1", "T-ui-2"], "status": "todo" },
-
-    { "id": "T-e2e", "group": "cross", "wave": 4, "title": "E2E: engine-e2e(线索中心) + website-e2e(留资提交) 全用例", "dependsOn": ["T-eng-2", "T-web-2", "T-eng-3"], "status": "todo" }
+    {
+      "id": "T-be-1",
+      "group": "backend-java",
+      "wave": 1,
+      "title": "schema.sql 增 forms/leads 表 (UUID, IF NOT EXISTS)",
+      "dependsOn": [],
+      "status": "done"
+    },
+    {
+      "id": "T-be-2",
+      "group": "backend-java",
+      "wave": 1,
+      "title": "Form/Lead 领域: entity/mapper/service/controller + dto",
+      "dependsOn": [
+        "T-be-1"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-be-4",
+      "group": "backend-java",
+      "wave": 1,
+      "title": "DedupService: dedup_hash + policy",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-be-5",
+      "group": "backend-java",
+      "wave": 1,
+      "title": "AntiSpamService: Redis 滑动窗口频控 + 验证码校验",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-be-7",
+      "group": "backend-java",
+      "wave": 1,
+      "title": "LeadSecurityConfig: AES 加密(phone/email) + 日志脱敏 + 错误码",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-be-6",
+      "group": "backend-java",
+      "wave": 1,
+      "title": "LeadNotifyService: Webhook 异步通知 + 重试",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-be-3",
+      "group": "backend-java",
+      "wave": 2,
+      "title": "PublicLeadController: POST /backend/lead/forms/:id/submit",
+      "dependsOn": [
+        "T-be-2",
+        "T-be-4",
+        "T-be-5",
+        "T-be-7"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-ui-1",
+      "group": "ui",
+      "wave": 1,
+      "title": "确认 luban-low-code registry LubanForm 注册 + 提交事件",
+      "dependsOn": [],
+      "status": "done"
+    },
+    {
+      "id": "T-ui-2",
+      "group": "ui",
+      "wave": 1,
+      "title": "formSubmit 运行时 + submitConfig schema (向后兼容)",
+      "dependsOn": [
+        "T-ui-1"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-bff-1",
+      "group": "bff",
+      "wave": 2,
+      "title": "forms routes: GET list/POST/GET/PATCH",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-bff-2",
+      "group": "bff",
+      "wave": 2,
+      "title": "leads routes: list/detail/status/export",
+      "dependsOn": [
+        "T-be-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-bff-4",
+      "group": "bff",
+      "wave": 2,
+      "title": "antiSpam lib (BFF 前置频控)",
+      "dependsOn": [],
+      "status": "done"
+    },
+    {
+      "id": "T-bff-3",
+      "group": "bff",
+      "wave": 3,
+      "title": "forms/[id]/submit route (公开留资)",
+      "dependsOn": [
+        "T-be-3",
+        "T-bff-4"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-eng-1",
+      "group": "engine",
+      "wave": 2,
+      "title": "api/lead.ts + api/form.ts",
+      "dependsOn": [
+        "T-bff-1",
+        "T-bff-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-eng-2",
+      "group": "engine",
+      "wave": 2,
+      "title": "LeadList + LeadDetail 视图 + 路由 + 菜单",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-eng-3",
+      "group": "engine",
+      "wave": 3,
+      "title": "PageEditor 表单配置面板",
+      "dependsOn": [
+        "T-ui-2",
+        "T-eng-1"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-web-1",
+      "group": "website",
+      "wave": 3,
+      "title": "composables/useLeadSubmit + utm 解析",
+      "dependsOn": [
+        "T-bff-3"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-web-2",
+      "group": "website",
+      "wave": 3,
+      "title": "渲染端接入表单提交 + 成功态",
+      "dependsOn": [
+        "T-web-1",
+        "T-ui-2"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-e2e",
+      "group": "cross",
+      "wave": 4,
+      "title": "E2E: engine-e2e(线索中心) + website-e2e(留资提交) 全用例",
+      "dependsOn": [
+        "T-eng-2",
+        "T-web-2",
+        "T-eng-3"
+      ],
+      "status": "todo"
+    }
   ],
   "waves": {
-    "1": { "label": "契约源头(并行)", "tasks": ["T-be-1","T-be-2","T-be-4","T-be-5","T-be-6","T-be-7","T-ui-1","T-ui-2"] },
-    "2": { "label": "聚合层(并行)", "tasks": ["T-be-3","T-bff-1","T-bff-2","T-bff-4","T-eng-1","T-eng-2"] },
-    "3": { "label": "集成层(并行)", "tasks": ["T-bff-3","T-eng-3","T-web-1","T-web-2"] },
-    "4": { "label": "验收", "tasks": ["T-e2e"] }
-  }
+    "1": {
+      "label": "契约源头(并行)",
+      "tasks": [
+        "T-be-1",
+        "T-be-2",
+        "T-be-4",
+        "T-be-5",
+        "T-be-6",
+        "T-be-7",
+        "T-ui-1",
+        "T-ui-2"
+      ]
+    },
+    "2": {
+      "label": "聚合层(并行)",
+      "tasks": [
+        "T-be-3",
+        "T-bff-1",
+        "T-bff-2",
+        "T-bff-4",
+        "T-eng-1",
+        "T-eng-2"
+      ]
+    },
+    "3": {
+      "label": "集成层(并行)",
+      "tasks": [
+        "T-bff-3",
+        "T-eng-3",
+        "T-web-1",
+        "T-web-2"
+      ]
+    },
+    "4": {
+      "label": "验收",
+      "tasks": [
+        "T-e2e"
+      ]
+    }
+  },
+  "status": "done"
 }

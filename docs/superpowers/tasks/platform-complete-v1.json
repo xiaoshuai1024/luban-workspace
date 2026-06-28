@@ -263,7 +263,7 @@
         "T-eng-1",
         "T-ui-12"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-eng-3",
@@ -275,7 +275,7 @@
         "T-eng-1",
         "T-ui-1"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-eng-4",
@@ -287,7 +287,7 @@
         "T-eng-1",
         "T-ui-6"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-eng-5",
@@ -299,7 +299,7 @@
         "T-eng-1",
         "T-ui-2"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-eng-6",
@@ -311,7 +311,7 @@
         "T-eng-1",
         "T-ui-2"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-eng-7",
@@ -323,7 +323,7 @@
         "T-eng-1",
         "T-bff-1"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-eng-8",
@@ -378,7 +378,7 @@
       "dependsOn": [
         "T-be-7"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-bff-2",
@@ -389,7 +389,7 @@
       "dependsOn": [
         "T-bff-1"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-bff-3",
@@ -443,7 +443,7 @@
       "dependsOn": [
         "T-ui-12"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-web-2",
@@ -454,7 +454,7 @@
       "dependsOn": [
         "T-web-1"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-web-3",
@@ -465,7 +465,7 @@
       "dependsOn": [
         "T-web-1"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-web-4",
@@ -476,7 +476,7 @@
       "dependsOn": [
         "T-web-2"
       ],
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "T-cross-1",
@@ -608,5 +608,6 @@
     "web": "85%",
     "ui": "90%",
     "client": "N/A (规划态)"
-  }
+  },
+  "status": "in_progress"
 }

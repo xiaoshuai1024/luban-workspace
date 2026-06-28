@@ -2,12 +2,12 @@
   "featureId": "architecture-governance",
   "title": "架构治理自动化",
   "createdAt": "2026-06-25",
-  "status": "draft",
+  "status": "in_progress",
   "tasks": [
     {
       "id": "T1",
       "title": "Java: ArchUnit 依赖与测试基础设施（pom.xml + surefire/jacoco）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
       "dependsOn": [],
       "group": "backend-java",
@@ -16,70 +16,90 @@
     {
       "id": "T2",
       "title": "Java: 分层依赖 ArchUnit 测试（LayerDependencyTest）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
       "verification": "mvn -q test -Dtest=LayerDependencyTest"
     },
     {
       "id": "T3",
       "title": "Java: 命名规范 ArchUnit 测试（NamingConventionTest）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
       "verification": "mvn -q test -Dtest=NamingConventionTest"
     },
     {
       "id": "T4",
       "title": "Java: DTO/Entity 隔离 ArchUnit 测试（DtoEntityIsolationTest）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
       "verification": "mvn -q test -Dtest=DtoEntityIsolationTest"
     },
     {
       "id": "T5",
       "title": "Java: 异常层次 ArchUnit 测试（ExceptionHierarchyTest）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
       "verification": "mvn -q test -Dtest=ExceptionHierarchyTest"
     },
     {
       "id": "T6",
       "title": "Java: 编码规范 ArchUnit 测试（CodingStandardTest）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
       "verification": "mvn -q test -Dtest=CodingStandardTest"
     },
     {
       "id": "T7",
       "title": "Java: 双后端契约 ArchUnit 测试（DualBackendContractTest）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T1"],
+      "dependsOn": [
+        "T1"
+      ],
       "group": "backend-java",
       "verification": "mvn -q test -Dtest=DualBackendContractTest"
     },
     {
       "id": "T8",
       "title": "Java: CI test workflow（GitHub Actions）",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T1", "T2", "T3", "T4", "T5", "T6", "T7"],
+      "dependsOn": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7"
+      ],
       "group": "backend-java",
       "verification": "gh workflow run test.yml --ref <branch>"
     },
     {
       "id": "T9",
       "title": "Go: go-cleanarch 依赖 + 分层架构测试",
-      "status": "pending",
+      "status": "not_applicable",
       "priority": "high",
       "dependsOn": [],
       "group": "backend-go",
@@ -88,7 +108,7 @@
     {
       "id": "T10",
       "title": "Go: golangci-lint 配置（.golangci.yml）",
-      "status": "pending",
+      "status": "not_applicable",
       "priority": "high",
       "dependsOn": [],
       "group": "backend-go",
@@ -97,16 +117,18 @@
     {
       "id": "T11",
       "title": "Go: CI lint workflow（GitHub Actions）",
-      "status": "pending",
+      "status": "not_applicable",
       "priority": "medium",
-      "dependsOn": ["T10"],
+      "dependsOn": [
+        "T10"
+      ],
       "group": "backend-go",
       "verification": "gh workflow run lint.yml --ref <branch>"
     },
     {
       "id": "T12",
       "title": "Meta: 共享基线标准文档（docs/ARCH_LINT_STANDARDS.md）",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
       "dependsOn": [],
       "group": "meta",
@@ -115,63 +137,88 @@
     {
       "id": "T13",
       "title": "Engine: ESLint v9 + Prettier + stylelint + eslint-plugin-boundaries + dependency-cruiser",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T12"],
+      "dependsOn": [
+        "T12"
+      ],
       "group": "engine",
       "verification": "cd packages/engine/luban && pnpm run lint"
     },
     {
       "id": "T14",
       "title": "Website: ESLint v9 + Prettier + stylelint + eslint-plugin-boundaries + dependency-cruiser",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T12"],
+      "dependsOn": [
+        "T12"
+      ],
       "group": "website",
       "verification": "cd packages/web/luban-website && pnpm run lint"
     },
     {
       "id": "T15",
       "title": "BFF: 补齐 Prettier + stylelint + eslint-plugin-boundaries + dependency-cruiser",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T12"],
+      "dependsOn": [
+        "T12"
+      ],
       "group": "bff",
       "verification": "cd packages/bff/luban-bff && pnpm run lint"
     },
     {
       "id": "T16",
       "title": "UI: stylelint 补齐 + Nx boundaries 收紧 + dependency-cruiser",
-      "status": "pending",
+      "status": "done",
       "priority": "high",
-      "dependsOn": ["T12"],
+      "dependsOn": [
+        "T12"
+      ],
       "group": "ui",
       "verification": "cd packages/ui/luban-ui && pnpm run lint"
     },
     {
       "id": "T17",
       "title": "Frontend: Git Hooks（husky + lint-staged + commitlint，4 个包）",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T13", "T14", "T15", "T16"],
+      "dependsOn": [
+        "T13",
+        "T14",
+        "T15",
+        "T16"
+      ],
       "group": "cross",
       "verification": "git commit -m 'test: verify lint-staged' --dry-run"
     },
     {
       "id": "T18",
       "title": "Frontend: CI lint workflows（engine/website/bff/ui 各加 lint job）",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T13", "T14", "T15", "T16"],
+      "dependsOn": [
+        "T13",
+        "T14",
+        "T15",
+        "T16"
+      ],
       "group": "cross",
       "verification": "gh workflow run lint.yml --ref <branch>"
     },
     {
       "id": "T19",
       "title": "Meta: make lint 统一覆盖（scripts/git/run-per-pkg.sh 不再静默跳过）",
-      "status": "pending",
+      "status": "done",
       "priority": "medium",
-      "dependsOn": ["T13", "T14", "T15", "T16", "T8", "T11"],
+      "dependsOn": [
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T8",
+        "T11"
+      ],
       "group": "meta",
       "verification": "make lint 2>&1 | grep -c 'passed'"
     },
@@ -180,7 +227,9 @@
       "title": "验证门禁: 全量 lint + test 通过",
       "status": "pending",
       "priority": "high",
-      "dependsOn": ["T19"],
+      "dependsOn": [
+        "T19"
+      ],
       "group": "cross",
       "verification": "make lint && make test-coverage"
     }

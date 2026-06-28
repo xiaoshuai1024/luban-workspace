@@ -4,29 +4,213 @@
   "plan": "../../docs/superpowers/plans/2026-06-25-designer-polish.md",
   "notes": "纯前端改造（engine + luban-low-code），无后端/API/DB变更。分期执行：W1 IDE装配 → W2 精致度 → W3 能力扩展。",
   "tasks": [
-    { "id": "T-eng-1", "group": "engine", "wave": 1, "title": "PageEditor.vue 重写为 IDE 三栏布局 + Cypress drag 基础设施（@4tw/cypress-drag-drop + 自定义 drag 命令）+ designMode=true", "dependsOn": [], "status": "todo" },
-    { "id": "T-eng-2", "group": "engine", "wave": 1, "title": "DesignerToolbar 接线（undo/redo/设备切换/模式切换/模板/保存）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-eng-3", "group": "engine", "wave": 1, "title": "PropertyPanel 接线（选中节点→getComponentMeta→渲染→patch 回写 schema）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-eng-4", "group": "engine", "wave": 1, "title": "ComponentPanel 接线（getPaletteGroups + HTML5 drag + 最近使用）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-eng-5", "group": "engine", "wave": 1, "title": "OutlineTree 接线（递归渲染+选中联动+复制删除上下移+显隐锁定 toggle）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-eng-6", "group": "engine", "wave": 1, "title": "ContextMenu + useDesignerKeyboard 全局快捷键（撤销重做/复制粘贴克隆/删除/保存/Esc）", "dependsOn": ["T-eng-1", "T-eng-2"], "status": "todo" },
-    { "id": "T-eng-7", "group": "engine", "wave": 1, "title": "CodeEditor 接线（代码模式双向绑定 JSON↔schema）", "dependsOn": ["T-eng-1", "T-eng-2"], "status": "todo" },
-
-    { "id": "T-ui-1", "group": "ui", "wave": 2, "title": "选中框 + 尺寸标注 W×H（DesignRenderer 增选中 overlay）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-ui-2", "group": "ui", "wave": 2, "title": "数值 scrub ScrubInput.vue（NumberSetter/SpacingSetter hover 上下拖改值）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-ui-3", "group": "ui", "wave": 2, "title": "对齐辅助线升级（等距高亮紫色线 + SortableJS drag 事件绑定）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-ui-4", "group": "ui", "wave": 2, "title": "PropertyPanel 分组折叠（FoldItem）+ 搜索框", "dependsOn": ["T-eng-3"], "status": "todo" },
-    { "id": "T-ui-5", "group": "ui", "wave": 2, "title": "NodeToolbar 升级（拖拽手柄+层级按钮+气泡 tooltip 替代 title）", "dependsOn": ["T-eng-1"], "status": "todo" },
-    { "id": "T-ui-6", "group": "ui", "wave": 2, "title": "组件库缩略图（emoji→组件 mini 预览 SVG）", "dependsOn": ["T-eng-4"], "status": "todo" },
-
-    { "id": "T-ui-7", "group": "ui", "wave": 3, "title": "Setter 扩充（NumberSetter/SliderSetter/CodeSetter/IconSetter/ExpressionSetter/EffectSetter）", "dependsOn": ["T-eng-3", "T-ui-2", "T-ui-4"], "status": "todo" },
-    { "id": "T-ui-8", "group": "ui", "wave": 3, "title": "物料缺口补全（为 17 个 luban-base 组件补 material.ts propsSchema）", "dependsOn": ["T-eng-4"], "status": "todo" },
-    { "id": "T-ui-9", "group": "ui", "wave": 3, "title": "schema 联动声明（JSONSchemaProperty 增 visibleWhen + PropertyPanel 消费）", "dependsOn": ["T-ui-7", "T-ui-8"], "status": "todo" },
-    { "id": "T-ui-10", "group": "ui", "wave": 3, "title": "snippet 预设（MaterialDefinition 增 snippets + ComponentPanel 展示变体）", "dependsOn": ["T-ui-8"], "status": "todo" }
+    {
+      "id": "T-eng-1",
+      "group": "engine",
+      "wave": 1,
+      "title": "PageEditor.vue 重写为 IDE 三栏布局 + Cypress drag 基础设施（@4tw/cypress-drag-drop + 自定义 drag 命令）+ designMode=true",
+      "dependsOn": [],
+      "status": "superseded"
+    },
+    {
+      "id": "T-eng-2",
+      "group": "engine",
+      "wave": 1,
+      "title": "DesignerToolbar 接线（undo/redo/设备切换/模式切换/模板/保存）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-eng-3",
+      "group": "engine",
+      "wave": 1,
+      "title": "PropertyPanel 接线（选中节点→getComponentMeta→渲染→patch 回写 schema）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-eng-4",
+      "group": "engine",
+      "wave": 1,
+      "title": "ComponentPanel 接线（getPaletteGroups + HTML5 drag + 最近使用）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-eng-5",
+      "group": "engine",
+      "wave": 1,
+      "title": "OutlineTree 接线（递归渲染+选中联动+复制删除上下移+显隐锁定 toggle）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-eng-6",
+      "group": "engine",
+      "wave": 1,
+      "title": "ContextMenu + useDesignerKeyboard 全局快捷键（撤销重做/复制粘贴克隆/删除/保存/Esc）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-eng-2"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-eng-7",
+      "group": "engine",
+      "wave": 1,
+      "title": "CodeEditor 接线（代码模式双向绑定 JSON↔schema）",
+      "dependsOn": [
+        "T-eng-1",
+        "T-eng-2"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-ui-1",
+      "group": "ui",
+      "wave": 2,
+      "title": "选中框 + 尺寸标注 W×H（DesignRenderer 增选中 overlay）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-ui-2",
+      "group": "ui",
+      "wave": 2,
+      "title": "数值 scrub ScrubInput.vue（NumberSetter/SpacingSetter hover 上下拖改值）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-ui-3",
+      "group": "ui",
+      "wave": 2,
+      "title": "对齐辅助线升级（等距高亮紫色线 + SortableJS drag 事件绑定）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-ui-4",
+      "group": "ui",
+      "wave": 2,
+      "title": "PropertyPanel 分组折叠（FoldItem）+ 搜索框",
+      "dependsOn": [
+        "T-eng-3"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-ui-5",
+      "group": "ui",
+      "wave": 2,
+      "title": "NodeToolbar 升级（拖拽手柄+层级按钮+气泡 tooltip 替代 title）",
+      "dependsOn": [
+        "T-eng-1"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-ui-6",
+      "group": "ui",
+      "wave": 2,
+      "title": "组件库缩略图（emoji→组件 mini 预览 SVG）",
+      "dependsOn": [
+        "T-eng-4"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-ui-7",
+      "group": "ui",
+      "wave": 3,
+      "title": "Setter 扩充（NumberSetter/SliderSetter/CodeSetter/IconSetter/ExpressionSetter/EffectSetter）",
+      "dependsOn": [
+        "T-eng-3",
+        "T-ui-2",
+        "T-ui-4"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-ui-8",
+      "group": "ui",
+      "wave": 3,
+      "title": "物料缺口补全（为 17 个 luban-base 组件补 material.ts propsSchema）",
+      "dependsOn": [
+        "T-eng-4"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T-ui-9",
+      "group": "ui",
+      "wave": 3,
+      "title": "schema 联动声明（JSONSchemaProperty 增 visibleWhen + PropertyPanel 消费）",
+      "dependsOn": [
+        "T-ui-7",
+        "T-ui-8"
+      ],
+      "status": "superseded"
+    },
+    {
+      "id": "T-ui-10",
+      "group": "ui",
+      "wave": 3,
+      "title": "snippet 预设（MaterialDefinition 增 snippets + ComponentPanel 展示变体）",
+      "dependsOn": [
+        "T-ui-8"
+      ],
+      "status": "done"
+    }
   ],
   "waves": {
-    "1": { "label": "W1 IDE装配（设计器可用）", "tasks": ["T-eng-1","T-eng-2","T-eng-3","T-eng-4","T-eng-5","T-eng-6","T-eng-7"] },
-    "2": { "label": "W2 精致度打磨（专业交互）", "tasks": ["T-ui-1","T-ui-2","T-ui-3","T-ui-4","T-ui-5","T-ui-6"] },
-    "3": { "label": "W3 能力扩展（setter+物料补全）", "tasks": ["T-ui-7","T-ui-8","T-ui-9","T-ui-10"] }
-  }
+    "1": {
+      "label": "W1 IDE装配（设计器可用）",
+      "tasks": [
+        "T-eng-1",
+        "T-eng-2",
+        "T-eng-3",
+        "T-eng-4",
+        "T-eng-5",
+        "T-eng-6",
+        "T-eng-7"
+      ]
+    },
+    "2": {
+      "label": "W2 精致度打磨（专业交互）",
+      "tasks": [
+        "T-ui-1",
+        "T-ui-2",
+        "T-ui-3",
+        "T-ui-4",
+        "T-ui-5",
+        "T-ui-6"
+      ]
+    },
+    "3": {
+      "label": "W3 能力扩展（setter+物料补全）",
+      "tasks": [
+        "T-ui-7",
+        "T-ui-8",
+        "T-ui-9",
+        "T-ui-10"
+      ]
+    }
+  },
+  "status": "superseded"
 }

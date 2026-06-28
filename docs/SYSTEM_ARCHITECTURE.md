@@ -14,17 +14,17 @@
                         │   192.168.100.248                                    │
                         │     MySQL :13306  (db=luban, user=root)             │
                         │     Redis :16379                                     │
-                        └───────────────▲─────────────────────▲───────────────┘
-                                        │                     │
-                          ┌─────────────┴────────┐  ┌─────────┴──────────┐
-                          │  Java 后端 :8080      │  │  Go 后端 :8081      │  ← 双后端契约对齐
-                          │  /backend/*           │  │  /backend/*         │     (Go 为部分实现)
-                          └─────────────▲────────┘  └─────────▲──────────┘
-                                        │                     │
-                          ┌─────────────┴──────────────────────┴──────────┐
-                          │           BFF :3100  (Next.js)                  │  ← 聚合/鉴权/转码
-                          │  BACKEND_BASE_URL → http://127.0.0.1:8080/backend│
-                          └──────────▲──────────────────────▲──────────────┘
+                        └───────────────▲─────────────────────────────────────┘
+                                        │
+                          ┌─────────────┴────────────────────────────────────┐
+                          │  Java 后端 :8080  (单端权威)                        │
+                          │  /backend/*                                        │
+                          └─────────────▲─────────────────────────────────────┘
+                                        │
+                          ┌─────────────┴────────────────────────────────────┐
+                          │           BFF :3100  (Next.js)                     │  ← 聚合/鉴权/转码
+                          │  BACKEND_BASE_URL → http://127.0.0.1:8080/backend   │
+                          └──────────▲──────────────────────▲─────────────────┘
                                      │                      │
             ┌────────────────────────┴────┐     ┌───────────┴────────────────┐
             │  engine :5173 (Vue SPA)      │     │  website :3000 (Nuxt SSR)  │
@@ -32,23 +32,24 @@
             │  /api → proxy → BFF:3100     │     │  bffBaseUrl → BFF:3100     │
             └──────────────────────────────┘     └────────────────────────────┘
                      ▲                                       ▲
-                     │ Cypress :5173                         │ Playwright :3000
+                     │ Playwright :5173                      │ Playwright :3000
                      └───────────── E2E ─────────────────────┘
 ```
 
-**5 个应用服务 + 2 个中间件**：
+**4 个应用服务 + 2 个中间件**：
 
 | # | 系统 | 角色 | 本机 dev 端口 | 部署形态 |
 |---|------|------|--------------|----------|
 | 1 | **engine** (`luban`) | Vue 3 SPA — 运营后台 + 全屏设计器 `/designer` | **5173** | 本机 dev 裸进程 |
 | 2 | **bff** (`luban-bff`) | Next.js BFF — 鉴权/聚合/转码，转调后端 | **3100** | 本机 dev 裸进程 |
 | 3 | **website** (`luban-website`) | Nuxt 3 SSR — 访客公开站点 | **3000** | 本机 dev 裸进程 |
-| 4 | **Java 后端** (`luban-backend`) | Spring Boot REST — 主实现 | **8080** (ctx `/backend`) | 本机 dev 裸进程 (mvn) |
-| 5 | **Go 后端** (`luban-backend-go`) | Gin 双实现 — 契约对齐 | **8081** | 本机 dev 裸进程 |
-| 6 | MySQL | 共享 RDBMS | **13306**（远端 dev 服务器） | 192.168.100.248 |
-| 7 | Redis | 缓存/会话 | **16379**（远端 dev 服务器） | 192.168.100.248 |
+| 4 | **Java 后端** (`luban-backend`) | Spring Boot REST — 单端权威实现 | **8080** (ctx `/backend`) | 本机 dev 裸进程 (mvn) |
+| 5 | MySQL | 共享 RDBMS | **13306**（远端 dev 服务器） | 192.168.100.248 |
+| 6 | Redis | 缓存/会话 | **16379**（远端 dev 服务器） | 192.168.100.248 |
 
-> **端口设计原则**：本机 dev 全部用裸进程，端口互不冲突（5173/3100/3000/8080/8081）。**禁止本机起 docker**；中间件在远端 dev 服务器，本机应用的连接串指向远端。
+> **端口设计原则**：本机 dev 全部用裸进程，端口互不冲突（5173/3100/3000/8080）。**禁止本机起 docker**；中间件在远端 dev 服务器，本机应用的连接串指向远端。
+>
+> **Go 后端已废弃**（Q4=C 放弃双后端战略，2026-06-28，见 `docs/DUAL_BACKEND_PARITY.md` 历史归档）。
 
 ---
 
@@ -142,21 +143,7 @@
 
 ---
 
-### 2.5 Go 后端（双实现，契约对齐）
-
-| 项 | 值 | 配置来源 |
-|----|----|---------|
-| 包路径 | `packages/backend/luban-backend-go` | — |
-| 角色 | Gin 双实现；与 Java 同接口行为一致（部分实现） | — |
-| 端口 | `APP_PORT=8080`（容器内），主机映射 **8081** | `config/config.go:54`、`.env:2` |
-| context-path | `/backend`（与 Java 一致） | `router/router.go:50` |
-| MySQL/Redis | 同 Java（192.168.100.248:13306/16379） | `.env:7-17` |
-
-> **Go 是部分实现**：路由含 `/ping`、`/backend/public/sites`、`/backend/auth`、`/backend/sites`、`/backend/users`、`/backend/settings`、`/backend/datasources`。**缺 `/leads`、`/forms`**（lead-capture 在 Go 端明确不做，见 lead-capture plan §0.2）。契约测试须按此 scope。
-
----
-
-### 2.6 中间件（远端 dev 服务器）
+### 2.5 中间件（远端 dev 服务器）
 
 | 中间件 | 远端 dev（日常） | 本地 E2E compose（仅远端可起 docker） |
 |--------|------------------|----------------------------------------|
@@ -186,7 +173,6 @@ website :3000 (bffBaseUrl → BFF :3100)
 
 **最小可联调集**：Java + BFF + engine（运营后台基础链路）。
 **完整闭环**（含访客留资 SSR）：再加 website。
-**双后端契约**：再加 Go :8081（仅 contract 测试场景）。
 
 ### 3.2 关键数据流
 
@@ -220,7 +206,6 @@ website :3000 (bffBaseUrl → BFF :3100)
 | 命令 | 启动 | 端口 | 说明 |
 |------|------|------|------|
 | `make dev-java` | Java 后端 | 8080 | `start-mvn.bat`，含远端中间件 env，mvn spring-boot:run |
-| `make dev-go` | Go 后端 | 8081 | `APP_PORT=8081 go run .`（可选，契约测试用） |
 | `make dev-bff` | BFF | 3100 | `PORT=3100 next dev`（显式 3100，避免与 website 3000 冲突） |
 | `make dev-engine` | engine | 5173 | `vite`（proxy /api → 3100） |
 | `make dev-website` | website | 3000 | `NUXT_PUBLIC_BFF_BASE_URL=http://127.0.0.1:3100 nuxt dev`（修正默认值错误） |
@@ -272,7 +257,6 @@ npx cypress run --browser electron     # Cypress 15+ 兼容 Node24
 | **3100** | bff | `next dev -p 3100` | 必须显式 3100 |
 | **3000** | website | `nuxt dev` | nuxt 默认 |
 | **8080** | Java 后端 | `mvn spring-boot:run` | ctx `/backend` |
-| **8081** | Go 后端 | `go run .` | 双后端契约测试 |
 | **13306** | MySQL | 远端 192.168.100.248 | db `luban` |
 | **16379** | Redis | 远端 192.168.100.248 | 无密码 |
 
@@ -283,7 +267,6 @@ npx cypress run --browser electron     # Cypress 15+ 兼容 Node24
 1. **bff vs website 默认都 3000** — Makefile 的 `dev-bff` 显式 `-p 3100` 已修复；勿直接 `pnpm dev`（会撞 website）。
 2. **website `bffBaseUrl` 默认值错误**（`nuxt.config.ts:13` 写 3000 应为 3100）— Makefile 的 `dev-website` 用 env 覆盖；根因待修（建议直接改默认值）。
 3. **engine proxy 锁定 3100**（`vite.config.ts:23`）— 所以 BFF 必须在 3100，不能 3000。
-4. **Go 缺 `/leads` `/forms`** — 契约测试 scope 须排除这两个。
 5. **本机禁 docker / 中间件** — 连接串指向 192.168.100.248，勿用 localhost。
 6. **Node24 + Cypress** — 须 Cypress ≥15 + `CYPRESS_NO_V8_COMPILE_CACHE=1`；Cypress 13/14 的 Electron smoke-test 在 Node24 下崩溃。
 7. **`e2e/.env` 头注释 stale** — 写 engine=4200，实际 LUBAN_E2E_ENGINE_URL=5173。
@@ -294,9 +277,9 @@ npx cypress run --browser electron     # Cypress 15+ 兼容 Node24
 
 | 变量 | 作用 | 默认值 | 谁用 |
 |------|------|--------|------|
-| `APP_PORT` | Java/Go 端口 | 8080 | Java `application.yml`、Go `config.go` |
-| `MYSQL_HOST` / `MYSQL_PORT` / `MYSQL_DB` / `MYSQL_USER` / `MYSQL_PASSWORD` | MySQL 连接 | localhost:3306（dev 脚本覆盖为 192.168.100.248:13306） | Java/Go |
-| `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` | Redis 连接 | localhost:6379（dev 脚本覆盖为 192.168.100.248:16379） | Java/Go |
+| `APP_PORT` | Java 端口 | 8080 | Java `application.yml` |
+| `MYSQL_HOST` / `MYSQL_PORT` / `MYSQL_DB` / `MYSQL_USER` / `MYSQL_PASSWORD` | MySQL 连接 | localhost:3306（dev 脚本覆盖为 192.168.100.248:13306） | Java |
+| `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` | Redis 连接 | localhost:6379（dev 脚本覆盖为 192.168.100.248:16379） | Java |
 | `BACKEND_BASE_URL` | BFF 转发后端地址 | `http://127.0.0.1:8080/backend` | BFF `backendClient.ts` |
 | `BACKEND_TIMEOUT_MS` | BFF 调后端超时 | 15000 | BFF |
 | `VITE_API_BASE_URL` | engine API 入口 | `/api` | engine |
@@ -311,4 +294,4 @@ npx cypress run --browser electron     # Cypress 15+ 兼容 Node24
 
 - 端口/配置变更 → **同步更新本文档 + Makefile**（两者必须一致）。
 - 新增服务 → 在 §2 加详情、§5 加端口、Makefile 加 `dev-<name>` target。
-- 中间件地址变更 → 更新 Java/Go 启动脚本 + §2.6 + §7。
+- 中间件地址变更 → 更新 Java 启动脚本 + §2.6 + §7。
