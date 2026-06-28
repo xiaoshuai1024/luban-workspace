@@ -23,7 +23,7 @@
 
     { "id": "J-designer-history", "title": "设计器：撤销/重做", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["撤销（Ctrl+Z/工具条）", "重做（Ctrl+Shift+Z/工具条）", "防抖快照（500ms）"], "status": "covered", "note": "designer-edit E2（撤销）+ designer-history（H1撤销/H2重做/H3多次undo）" },
 
-    { "id": "J-designer-mode", "title": "设计器：模式切换（预览/代码）", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["切换预览模式（访客视角渲染）", "切换代码模式（JSON 编辑+实时校验+格式化）"], "status": "gap", "gapReason": "预览模式有覆盖（designer-edit E6）；代码模式无 spec" },
+    { "id": "J-designer-mode", "title": "设计器：模式切换（预览/代码）", "priority": "P0", "entrySubsystem": "engine", "scenarios": ["切换预览模式（访客视角渲染）", "切换代码模式（JSON 编辑+实时校验+格式化）"], "status": "covered", "note": "预览模式 designer-edit E6；代码模式 designer-code-mode CM1-3（engine 仓，待 env 配置后跑通）" },
 
     { "id": "J-designer-device", "title": "设计器：设备断点与响应式", "priority": "P1", "entrySubsystem": "engine", "scenarios": ["PC/iPad/H5 断点切换", "断点切换触发响应式属性渲染", "画布缩放/平移/网格"], "status": "covered", "note": "designer-device（D1默认PC/D2 iPad768px/D3 H5 375px/D4切回PC）" },
 
