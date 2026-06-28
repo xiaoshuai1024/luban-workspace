@@ -5,6 +5,7 @@
 // 完整 61 物料渲染器延后独立 plan（plan §10）。
 // 四态：加载 / 空 / 错（重试） / 成功。
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/page_payload.dart';
 import '../render/node_renderer.dart';
@@ -52,10 +53,12 @@ class _TextRendererPageState extends State<TextRendererPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return _ErrorView(
-              error: snapshot.error as ResolveException,
-              onRetry: _retry,
-            );
+            // 类型安全：非 ResolveException 的异常（CastError/TypeError 等）归为 unknown，不红屏
+            final err = snapshot.error;
+            final resolveException = err is ResolveException
+                ? err
+                : const ResolveException(ResolveError.unknown, '加载失败');
+            return _ErrorView(error: resolveException, onRetry: _retry);
           }
           final payload = snapshot.data!.payload;
           if (payload.schema.root.children == null ||
@@ -88,7 +91,7 @@ class _SuccessView extends StatelessWidget {
           ),
         ),
         // debug 调试条：渠道归因（仅展示，不影响发布版可去掉）
-        if (channelCode != null)
+        if (kDebugMode && channelCode != null)
           Container(
             width: double.infinity,
             color: Theme.of(context).colorScheme.surfaceContainerHighest,

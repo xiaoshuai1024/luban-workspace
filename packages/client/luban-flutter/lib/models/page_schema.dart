@@ -54,26 +54,39 @@ class NodeSchema {
     return NodeSchema(
       id: json['id'] as String? ?? '',
       type: json['type'] as String? ?? '',
-      props: json['props'] as Map<String, dynamic>?,
-      children: (json['children'] as List<dynamic>?)
-          ?.map((e) => NodeSchema.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      props: _asMap(json['props']),
+      children: _parseChildren(json['children']),
       visible: json['visible'],
       loop: json['loop'],
-      events: (json['events'] as Map<String, dynamic>?)?.map(
-        (k, v) => MapEntry(k, v.toString()),
-      ),
+      events: _asStringMap(json['events']),
       datasource: json['datasource'],
       locked: json['locked'] as bool?,
       hidden: json['hidden'] as bool?,
-      style: (json['style'] as Map<String, dynamic>?)?.map(
-        (k, v) => MapEntry(k, v.toString()),
-      ),
+      style: _asStringMap(json['style']),
       className: json['className'] as String?,
       responsive: json['responsive'],
       animation: json['animation'],
       cmsBinding: json['cmsBinding'],
     );
+  }
+
+  /// 脏数据防御：children 数组元素非 Map 时跳过，不抛 TypeError
+  static List<NodeSchema>? _parseChildren(Object? raw) {
+    if (raw is! List) return null;
+    return raw
+        .whereType<Map<String, dynamic>>()
+        .map(NodeSchema.fromJson)
+        .toList();
+  }
+
+  /// 脏数据防御：非 Map 时返回 null，不抛 TypeError
+  static Map<String, dynamic>? _asMap(Object? raw) =>
+      raw is Map<String, dynamic> ? raw : null;
+
+  /// 脏数据防御：Map 值转字符串，非 Map 返回 null
+  static Map<String, String>? _asStringMap(Object? raw) {
+    if (raw is! Map) return null;
+    return raw.map((k, v) => MapEntry(k.toString(), v.toString()));
   }
 
   /// 取 prop 字符串值（TextRenderer 取 content 用）
@@ -88,10 +101,17 @@ class NodeSchema {
     return null;
   }
 
-  /// 取 prop 布尔值（TextRenderer 取 secondary 用）
+  /// 取 prop 布尔值（TextRenderer 取 secondary 用）。
+  /// 支持 bool / 字符串 "true"|"false" / 数字 1|0（健壮转换，对齐 propInt 风格）
   bool? propBool(String key) {
     final v = props?[key];
     if (v is bool) return v;
+    if (v is String) {
+      if (v == 'true') return true;
+      if (v == 'false') return false;
+    }
+    if (v is int) return v != 0;
+    if (v is num) return v != 0;
     return null;
   }
 }

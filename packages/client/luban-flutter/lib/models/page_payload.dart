@@ -30,13 +30,13 @@ class PublicPagePayload {
   });
 
   factory PublicPagePayload.fromJson(Map<String, dynamic> json) {
-    final schemaJson = json['schema'] as Map<String, dynamic>;
+    // 脏数据防御：schema 缺失/非 Map 时构造空 root，不抛 TypeError（避免 UI 红屏）
+    final schemaRaw = json['schema'];
+    final Map<String, dynamic> schemaJson = schemaRaw is Map<String, dynamic>
+        ? schemaRaw
+        : const {'root': <String, dynamic>{}};
     // seo 可能在 schema.seo 或顶层 seo（website 两种位置都兼容）
-    final PageSeo? seo = (schemaJson['seo'] != null)
-        ? PageSeo.fromJson(schemaJson['seo'] as Map<String, dynamic>)
-        : (json['seo'] != null
-            ? PageSeo.fromJson(json['seo'] as Map<String, dynamic>)
-            : null);
+    final PageSeo? seo = _parseSeo(schemaJson['seo']) ?? _parseSeo(json['seo']);
     return PublicPagePayload(
       id: json['id'] as String? ?? '',
       siteId: json['siteId'] as String? ?? '',
@@ -49,4 +49,8 @@ class PublicPagePayload {
       updatedAt: json['updatedAt'] as String?,
     );
   }
+
+  /// 脏数据防御：seo 非 Map 时返回 null
+  static PageSeo? _parseSeo(Object? raw) =>
+      raw is Map<String, dynamic> ? PageSeo.fromJson(raw) : null;
 }
