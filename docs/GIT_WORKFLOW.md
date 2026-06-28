@@ -278,7 +278,6 @@ luban 11 个子项目默认分支不同，全量 `/pr-all` 可能部分失败。
 | `/pr-ui` | 仅 `packages/ui/luban-ui` |
 | `/pr-website` | 仅 `packages/web/luban-website` |
 | `/pr-backend-java` | 仅 `packages/backend/luban-backend` |
-| `/pr-backend-go` | 仅 `packages/backend/luban-backend-go` |
 | `/pr-client` | 仅 `packages/client/*` |
 | `/pr-workspace` | 仅 meta 仓 |
 

@@ -16,7 +16,6 @@
 | **client Electron/Flutter E2E** | 🔴 **子项目不存在**（空目录，非 submodule） | 待 client 子项目落地后另立 plan | — |
 | **BFF E2E** | 🔴 无 e2e（仅 Vitest unit）；契约由跨项目流程间接覆盖 | 不建独立浏览器 e2e | `cd packages/bff/luban-bff && pnpm run test`（unit） |
 | **后端 Java 集成测** | JUnit+H2 `src/test/java/**/{*Test,*IT}.java` | 同现状 | `cd packages/backend/luban-backend && mvn -q verify` |
-| **后端 Go 测试** | go test `**/*_test.go`（全单测） | 同现状 | `cd packages/backend/luban-backend-go && go test ./...` |
 | **跨项目流程性 E2E（主项目）** | 🔴 无 | Playwright `e2e/`（workspace 根，独立 npm 包） | `make e2e-cross`（见 §1.4） |
 
 ### 1.3 engine 现有 Cypress 假绿警告（MUST 知晓）
@@ -135,7 +134,6 @@
 
 - 后端 API 须健康（Java 后端 `http://127.0.0.1:8080`，Go 后端按其配置）。**Agent 执行引擎 E2E 前**：若健康检查失败，**须尝试**启动后端：
   - Java：`cd packages/backend/luban-backend && mvn spring-boot:run`
-  - Go：`cd packages/backend/luban-backend-go && go run`
 - BFF 须健康（`cd packages/bff/luban-bff && pnpm run dev`）
 - 引擎调试页或 website 须可访问
 - 本机已安装 Google Chrome；首次跑前执行 `pnpm run install:e2e`
