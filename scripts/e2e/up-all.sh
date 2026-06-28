@@ -32,7 +32,6 @@ wait_http() {
 
 # health probes（200/401/404/302 均视为在线）
 wait_http "http://127.0.0.1:8080/backend/actuator/health" "backend-java" 90 || exit 1
-wait_http "http://127.0.0.1:8081/" "backend-go" 90 || exit 1
 wait_http "http://127.0.0.1:3100/" "bff" 60 || exit 1
 wait_http "http://127.0.0.1:4200/" "engine" 60 || exit 1
 wait_http "http://127.0.0.1:3000/" "website" 60 || exit 1
@@ -40,7 +39,6 @@ wait_http "http://127.0.0.1:3000/" "website" 60 || exit 1
 echo ""
 echo "[e2e] 全部服务就绪。"
 echo "  Java      http://127.0.0.1:8080/backend"
-echo "  Go        http://127.0.0.1:8081"
 echo "  BFF       http://127.0.0.1:3100"
 echo "  engine    http://127.0.0.1:4200"
 echo "  website   http://127.0.0.1:3000"

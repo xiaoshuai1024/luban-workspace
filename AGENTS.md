@@ -42,10 +42,9 @@ luban-workspace/                  # meta 仓
 | `luban-task-graph-ssot.md` | 任务图 JSON 为 SSOT | 编写/修改 plans/tasks 前 |
 | `luban-plan-contract.md` | 方案编写契约/必选章节 | 编辑 plans/*.md 时 |
 | `luban-frontend-ux-enum.md` | 交互组件决策树 + 枚举中文映射（基准 luban-ui） | 编辑 .vue 时 |
-| `luban-cross-cutting-standards.md` | 双后端契约/BFF字段/引擎物料schema/多端一致/分页错误体 | 跨模块新功能、合入前 |
+| `luban-cross-cutting-standards.md` | BFF字段/引擎物料schema/多端一致/分页错误体 | 跨模块新功能、合入前 |
 | `luban-lowcode-engine-quality.md` | 引擎门槛：零console/物料schema/各端渲染一致 | 编辑 engine/ui 时 |
 | `luban-codegraph-usage.md` | 优先用 CodeGraph MCP 工具做代码结构查询（codegraph_*） | 查代码结构/调用链/影响分析前 |
-| `luban-dual-backend-parity.md` | Java/Go 同接口行为一致 | 编辑任一后端时 |
 | `luban-material-schema.md` | 物料注册/props schema/版本 | 编辑物料/引擎 schema 时 |
 | `luban-multi-client-consistency.md` | electron/flutter/web 业务一致 | 编辑 client/* 时 |
 | `luban-github-agile-agent.md` | gh CLI 优先/Issue/PR/label 约定 | 涉及 GitHub 时 |
@@ -61,13 +60,12 @@ luban-workspace/                  # meta 仓
 
 | 文档 | 用途 |
 |------|------|
-| `docs/AGENT_RULES.md` | Agent 全部规则（§0–11：语言/Git/子任务/文档/API/后端Java/后端Go/前端/RWD/多端/低代码/需求） |
+| `docs/AGENT_RULES.md` | Agent 全部规则（§0–11：语言/Git/子任务/文档/API/后端Java/前端/RWD/多端/低代码/需求） |
 | `docs/SUPERPOWERS.md` | 工作流：brainstorming→writing-plans→executing-plans |
 | `docs/GIT_WORKFLOW.md` | Git 工作流（GitHub：分支/Commit/PR） |
 | `docs/TESTING_SPEC.md` | 全栈测试规范（分栈覆盖率/分层/E2E） |
 | `docs/E2E_AGENT_GUIDE.md` | E2E 执行单一指南（引擎渲染/website/多端） |
 | `docs/LOWCODE_ENGINE_SPEC.md` | 低代码引擎/物料/schema 规范 |
-| `docs/DUAL_BACKEND_PARITY.md` | Java/Go 双后端契约对齐 |
 | `docs/UI_SPEC.md` | luban 设计 token / 组件规范摘要 |
 | `docs/SYSTEM_ARCHITECTURE.md` | **服务拓扑 SSOT**：各系统角色/端口/依赖/启动方式（Makefile dev-* target）/已知陷阱 |
 | `docs/dev/INDEX.md` | 技术经验库索引（调试/安全/Java标准/后端日志/事故方法论等，从 kangdou 迁移） |
@@ -79,8 +77,7 @@ luban-workspace/                  # meta 仓
 - **前端/引擎/BFF/website**：TypeScript，统一 pnpm
 - **UI 物料库**：Vue 3 + Vite，pnpm
 - **后端 Java**：Spring Boot + Maven
-- **后端 Go**：go mod
-- **双后端（MUST）**：Java 与 Go 同接口须行为一致，见 `docs/DUAL_BACKEND_PARITY.md`
+- **单端权威**：Java 为唯一后端实现（Go 双后端战略已放弃，Q4=C，2026-06-28，见 `docs/DUAL_BACKEND_PARITY.md`）
 
 ### 改码后按包构建验证（MUST）
 每在一个包改码后，在该包根执行构建+测试，无报错再结束。分层与覆盖率见 `.agents/rules/luban-testing-coverage.md`。
@@ -101,7 +98,7 @@ luban-workspace/                  # meta 仓
 `/pull-all` — 各 submodule 同步默认分支
 `/push-all` — 各 submodule commit+push（不建 PR）
 `/pr-all` — 各 submodule + meta 仓 gh pr create
-`/pr-engine` `/pr-bff` `/pr-ui` `/pr-website` `/pr-backend-java` `/pr-backend-go` `/pr-client` `/pr-workspace` — 按包提 PR
+`/pr-engine` `/pr-bff` `/pr-ui` `/pr-website` `/pr-backend-java` `/pr-client` `/pr-workspace` — 按包提 PR
 `/merge-branch` `/merge-conflict` — 分支合并/冲突处理
 `/flyway-squash` — Java 后端 DB 迁移整理
 `/prod-debug` `/prod-testing` — 生产调试/测试
@@ -122,9 +119,28 @@ luban-workspace/                  # meta 仓
 6. **协作粒度**：能开 subagent 就并行
 7. **Git 分支检查**：第一次写入前；默认留用户当前分支
 8. **Worktree 约定**：计划类用 `.worktrees/`
-9. **双后端提醒**：改 backend 时检查是否需同步另一端
-10. **低代码引擎提醒**：改 engine/ui/schema 时检查各端渲染一致
-11. **非沙箱权限确认**：新会话执行非沙箱命令前询问
+9. **低代码引擎提醒**：改 engine/ui/schema 时检查各端渲染一致
+10. **非沙箱权限确认**：新会话执行非沙箱命令前询问
+
+### 会话记忆闭环（MUST）
+
+进度记忆**只存 SSOT，不靠对话**。完成/阻塞任何任务后：
+
+1. 更新 `docs/superpowers/tasks/<featureId>.json` 对应 task 的 `status`（`in_progress`/`done`/`blocked`+`blockedReason`）与 `metadata.updatedAt`；
+2. 下一会话 SessionStart hook 会自动读出——无需手动汇报"上次做到哪"；
+3. 经验类教训（"不要再犯"）：先落对应 rule 文件 `.agents/rules/*.md`，成熟后由 `self-improve.md` 机制升级。
+
+> 已废弃：早期配置的 memory MCP（`@modelcontextprotocol/server-memory`，D:/ 路径）已移除——知识图谱 JSONL 不进 git、与你"完成任务时间线"的需求不匹配。记忆统一走 task 图 JSON + rules 文件，皆 version-controlled。
+
+### 会话记忆闭环（MUST）
+
+进度记忆**只存 SSOT，不靠对话**。完成/阻塞任何任务后：
+
+1. 更新 `docs/superpowers/tasks/<featureId>.json` 对应 task 的 `status`（`in_progress`/`done`/`blocked`+`blockedReason`）与 `metadata.updatedAt`；
+2. 下一会话 SessionStart hook 会自动读出——无需手动汇报"上次做到哪"；
+3. 经验类教训（"不要再犯"）：先落对应 rule 文件 `.agents/rules/*.md`，成熟后由 `self-improve.md` 机制升级。
+
+> 已废弃：早期配置的 memory MCP（`@modelcontextprotocol/server-memory`，D:/ 路径）已移除——知识图谱 JSONL 不进 git、与你"完成任务时间线"的需求不匹配。记忆统一走 task 图 JSON + rules 文件，皆 version-controlled。
 
 ### 会话记忆闭环（MUST）
 

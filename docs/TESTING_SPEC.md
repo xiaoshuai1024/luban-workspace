@@ -21,7 +21,6 @@
 | UI 物料库 | `packages/ui/luban-ui` | Vitest coverage-v8 | **90%** | 80% |
 | SSR 站点 | `packages/web/luban-website` | Vitest coverage-v8 | **85%** | 75% |
 | 后端 Java | `packages/backend/luban-backend` | JaCoCo | **80%** | 70% |
-| 后端 Go | `packages/backend/luban-backend-go` | `go test -cover` | **75%** | - |
 | client（各端） | `packages/client/*` | 各端原生工具 | **85%** | 75% |
 
 一键全栈覆盖率：`make test-coverage`（汇总表格 + HTML 报告）。
@@ -195,7 +194,7 @@ mvn jacoco:report              # 仅生成覆盖率报告
 ### 后端 Go — go mod
 
 ```bash
-cd packages/backend/luban-backend-go
+# Go 后端已废弃
 go test ./... -race -cover     # 全部测试 + 竞态检测 + 覆盖率
 go test ./... -run TestXxx     # 单个测试
 go test -coverprofile=cover.out ./... && go tool cover -html=cover.out  # HTML 覆盖率报告

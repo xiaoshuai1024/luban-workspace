@@ -15,7 +15,6 @@ luban-workspace — luban 低代码平台的统一治理 meta 仓。Git superpro
 | 组件库/物料 | `packages/ui/luban-ui` | Vue 3 / Vite | master |
 | SSR 站点 | `packages/web/luban-website` | TypeScript / SSR | master |
 | 后端 Java | `packages/backend/luban-backend` | Java / Spring Boot / Maven | master |
-| 后端 Go | `packages/backend/luban-backend-go` | Go | master |
 | AI 助手 | `packages/ai/luban-ai-assistant` | （规划中） | main |
 | 桌面端 | `packages/client/luban-electron` | Electron（规划） | main |
 | 移动端 | `packages/client/luban-flutter` | Flutter（规划） | main |
@@ -32,8 +31,8 @@ luban-workspace — luban 低代码平台的统一治理 meta 仓。Git superpro
 ### 2. 低代码引擎交付门槛（替代微信合规）
 凡改动引擎/物料/schema，须满足：本地 `pnpm run build` 成功且渲染器零新增 console error；物料 props schema 合规（见 `.agents/rules/luban-material-schema.md`）；引擎产物在 `packages/web/luban-website`（SSR）及各端渲染一致；不确定行为标注"需验证"。
 
-### 3. Java/Go 双后端行为一致
-同一接口契约，Java 与 Go 实现的响应体/错误码/状态机须一致；变更须两端同步或显式标注差异。见 `.agents/rules/luban-dual-backend-parity.md`。
+### 3. 后端单端权威（Java）
+Java 后端 `packages/backend/luban-backend` 为唯一后端实现（Go 双后端战略已放弃，Q4=C，2026-06-28，见 `docs/DUAL_BACKEND_PARITY.md`）。不再要求双后端契约对齐。
 
 ### 4. E2E 禁止跳过/假绿
 所有 E2E 真实执行，禁止 `*.skip`/条件跳过；需跳过须用户明确同意；禁止"未起依赖→全 skip→退出 0"冒充通过。见 `.agents/rules/luban-e2e-execution-contract.md`。
@@ -49,10 +48,6 @@ pnpm install · pnpm test · pnpm run build · pnpm run test:e2e
 mvn -q verify          # 单测 + 集成测
 mvn spring-boot:run
 ```
-### 后端 Go
-```bash
-go test ./... -race -cover
-```
 ### 全栈门禁
 ```bash
 make test-coverage     # 一键分栈覆盖率汇总 + HTML 报告
@@ -61,20 +56,18 @@ make test-coverage     # 一键分栈覆盖率汇总 + HTML 报告
 ## 包管理
 - **TS 仓统一 pnpm**；禁用 npm install / yarn（CI/遗留除外）
 - **Java 仓用 Maven**；禁用 Gradle
-- **Go 仓用 go mod**
 
 ## 文件编码（MUST）
 所有 `.ts/.vue/.js/.go/.java` 必须 **UTF-8 without BOM**。发现乱码立即修复，不得用 GBK/Latin-1。
 
 ## 架构概览
 ```
-低代码引擎(luban) → BFF(luban-bff) → 后端双实现(Java / Go)
+低代码引擎(luban) → BFF(luban-bff) → Java 后端(单端权威)
         ↑
   UI 物料库(luban-ui) + SSR 站点(luban-website) + 多端(electron/flutter) + AI 助手
 ```
 - 引擎消费 luban-ui 物料的组件 + schema 渲染页面
-- BFF 聚合后端（Java/Go）能力，供引擎/website/多端调用
-- Java 与 Go 后端是同一业务的双实现，须行为一致
+- BFF 聚合后端（Java）能力，供引擎/website/多端调用
 
 ## 关键约定
 
@@ -86,7 +79,7 @@ make test-coverage     # 一键分栈覆盖率汇总 + HTML 报告
 
 ### 测试门禁
 - 每个子项目改码后在该包根目录执行构建+测试
-- 覆盖率目标：TS 引擎/bff/website 85% · UI 组件库 90% · Java 后端 80% · Go 后端 75%
+- 覆盖率目标：TS 引擎/bff/website 85% · UI 组件库 90% · Java 后端 80%
 - `make test-coverage` 汇总
 
 ### GitHub 集成（替代云效）
@@ -102,7 +95,7 @@ Edit/Write 任何文件前先 Read 确认当前状态，禁止凭记忆改。涉
 ## Agent Rules
 - 通用规范见 `AGENTS.md`（需加载）· 详细规则 `docs/AGENT_RULES.md`（§0–11）
 - 工作流 `docs/SUPERPOWERS.md` · 低代码引擎规范 `docs/LOWCODE_ENGINE_SPEC.md`
-- 双后端契约 `docs/DUAL_BACKEND_PARITY.md` · 测试规范 `docs/TESTING_SPEC.md`
+- 测试规范 `docs/TESTING_SPEC.md`
 - E2E 指南 `docs/E2E_AGENT_GUIDE.md` · 技术经验库 `docs/dev/`（见 `docs/dev/INDEX.md`）
 
 ## 启动检查（MUST）
