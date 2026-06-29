@@ -29,6 +29,39 @@
       "status": "planned",
       "journeyRef": "J-lead",
       "createdAt": "2026-06-27T12:38:11.674Z"
+    },
+    {
+      "epicId": "E-ai-assistant",
+      "title": "AI 助手 MVP",
+      "description": "AI 助手迁移演进 + P0 致命问题修复(Qdrant+LiteLLM+BFF反代+HITL+工具回环)",
+      "acceptanceCriteria": [
+        "AI 服务可启动且 healthz 全绿",
+        "B 端运营可通过 AI 面板自然语言生成页面并落地画布(需真实 LLM key)",
+        "C 端访客可通过浮窗进行 RAG 问答",
+        "工具回环可读取页面 schema 做增量编辑",
+        "设置页可配置 provider/model(热切换待真实 key 验证)"
+      ],
+      "storyIds": [
+        "ST-AI-013",
+        "ST-AI-014",
+        "ST-AI-015",
+        "ST-AI-016",
+        "ST-AI-017",
+        "ST-AI-018",
+        "ST-AI-019",
+        "ST-AI-020",
+        "ST-AI-021",
+        "ST-AI-022",
+        "ST-AI-023",
+        "ST-AI-024",
+        "ST-AI-025",
+        "ST-AI-026",
+        "ST-AI-027",
+        "ST-AI-028"
+      ],
+      "status": "in_progress",
+      "journeyRef": "J-ai-b-config",
+      "createdAt": "2026-06-29T01:19:29.842Z"
     }
   ],
   "stories": [
@@ -333,11 +366,439 @@
       "metadata": {
         "updatedAt": "2026-06-27T12:38:11.697Z"
       }
+    },
+    {
+      "storyId": "ST-AI-013",
+      "epicId": "E-ai-assistant",
+      "title": "M0 迁移地基:删废弃模块+换依赖+compose精简",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M0",
+          "subsystem": "ai",
+          "titleSnapshot": "M0 迁移地基:删废弃模块+换依赖+compose精简"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 13,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-014",
+      "epicId": "E-ai-assistant",
+      "title": "M1 LLM 层替换:Provider→LiteLLM(去instructor)",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M1",
+          "subsystem": "ai",
+          "titleSnapshot": "M1 LLM 层替换:Provider→LiteLLM(去instructor)"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 14,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-015",
+      "epicId": "E-ai-assistant",
+      "title": "M2 RAG 层替换:Milvus→Qdrant + embedding→LiteLLM",
+      "type": "task",
+      "storyPoints": 8,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M2",
+          "subsystem": "ai",
+          "titleSnapshot": "M2 RAG 层替换:Milvus→Qdrant + embedding→LiteLLM"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 15,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-016",
+      "epicId": "E-ai-assistant",
+      "title": "M3 鉴权改造:BFF 服务间信任(get_bff_user)+ JWT降级",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M3",
+          "subsystem": "ai",
+          "titleSnapshot": "M3 鉴权改造:BFF 服务间信任(get_bff_user)+ JWT降级"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 16,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-017",
+      "epicId": "E-ai-assistant",
+      "title": "M4 Agent 工具调用回环:httpx 回环 BFF 读 schema/线索",
+      "type": "task",
+      "storyPoints": 8,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M4",
+          "subsystem": "ai",
+          "titleSnapshot": "M4 Agent 工具调用回环:httpx 回环 BFF 读 schema/线索"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 17,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-018",
+      "epicId": "E-ai-assistant",
+      "title": "M5 BFF /api/ai/* 反代:SSE透传+服务间鉴权",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M5",
+          "subsystem": "bff",
+          "titleSnapshot": "M5 BFF /api/ai/* 反代:SSE透传+服务间鉴权"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 18,
+      "tags": [
+        "bff"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-019",
+      "epicId": "E-ai-assistant",
+      "title": "M6 engine AI 面板:抽屉+useAiChat SSE+HITL+撤销栈",
+      "type": "task",
+      "storyPoints": 8,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M6",
+          "subsystem": "engine",
+          "titleSnapshot": "M6 engine AI 面板:抽屉+useAiChat SSE+HITL+撤销栈"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 19,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-020",
+      "epicId": "E-ai-assistant",
+      "title": "M7a engine 设置页:AI 模型配置 tab(provider/model/key)",
+      "type": "task",
+      "storyPoints": 3,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M7a",
+          "subsystem": "engine",
+          "titleSnapshot": "M7a engine 设置页:AI 模型配置 tab(provider/model/key)"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 20,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-021",
+      "epicId": "E-ai-assistant",
+      "title": "M7b website C 端访客 AI 助手浮窗",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M7b",
+          "subsystem": "website",
+          "titleSnapshot": "M7b website C 端访客 AI 助手浮窗"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 21,
+      "tags": [
+        "website"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-022",
+      "epicId": "E-ai-assistant",
+      "title": "M8 E2E spec(5 passed,1 skipped)+ 4 子仓 PR 合并 dev",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "M8",
+          "subsystem": "cross",
+          "titleSnapshot": "M8 E2E spec(5 passed,1 skipped)+ 4 子仓 PR 合并 dev"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 22,
+      "tags": [
+        "cross"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-023",
+      "epicId": "E-ai-assistant",
+      "title": "P0-1/2 修复:HITL confirm 读 schema + 进度可视化(tool/warning)",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "P0-1/2",
+          "subsystem": "engine",
+          "titleSnapshot": "P0-1/2 修复:HITL confirm 读 schema + 进度可视化(tool/warning)"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 23,
+      "tags": [
+        "engine"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-024",
+      "epicId": "E-ai-assistant",
+      "title": "P0-3/4 修复:BFF parseAuthFromRequest 服务间鉴权 + visitor 放行",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "P0-3/4",
+          "subsystem": "bff",
+          "titleSnapshot": "P0-3/4 修复:BFF parseAuthFromRequest 服务间鉴权 + visitor 放行"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 24,
+      "tags": [
+        "bff"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-025",
+      "epicId": "E-ai-assistant",
+      "title": "P0-5 修复:MaterialRegistry 内置61物料 + 启动同步 Qdrant",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "done",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "P0-5",
+          "subsystem": "ai",
+          "titleSnapshot": "P0-5 修复:MaterialRegistry 内置61物料 + 启动同步 Qdrant"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 25,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-026",
+      "epicId": "E-ai-assistant",
+      "title": "热切换:AI 服务读 luban settings 表实现 provider 实时切换",
+      "type": "task",
+      "storyPoints": 3,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "热切换",
+          "subsystem": "ai",
+          "titleSnapshot": "热切换:AI 服务读 luban settings 表实现 provider 实时切换"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 26,
+      "tags": [
+        "backend-ai"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-027",
+      "epicId": "E-ai-assistant",
+      "title": "E2E 真实化:mock LLM fixture + 断言 schema 落地画布(非仅打字)",
+      "type": "task",
+      "storyPoints": 5,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "E2E",
+          "subsystem": "cross",
+          "titleSnapshot": "E2E 真实化:mock LLM fixture + 断言 schema 落地画布(非仅打字)"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 27,
+      "tags": [
+        "cross"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
+    },
+    {
+      "storyId": "ST-AI-028",
+      "epicId": "E-ai-assistant",
+      "title": "三家模型冒烟:DeepSeek/GLM/通义 真实 key 联调",
+      "type": "task",
+      "storyPoints": 3,
+      "status": "backlog",
+      "taskRefs": [
+        {
+          "featureId": "luban-ai-assistant-2026",
+          "taskId": "三家模型冒烟",
+          "subsystem": "cross",
+          "titleSnapshot": "三家模型冒烟:DeepSeek/GLM/通义 真实 key 联调"
+        }
+      ],
+      "sprintId": "S-2026-07-W1",
+      "order": 28,
+      "tags": [
+        "cross"
+      ],
+      "createdAt": "2026-06-29T01:19:29.842Z",
+      "metadata": {
+        "updatedAt": "2026-06-29T01:19:29.842Z"
+      },
+      "assignee": "agent"
     }
   ],
   "dependencies": [],
   "comments": [],
   "activityLog": [
+    {
+      "at": "2026-06-29T01:19:29.842Z",
+      "actor": "agent",
+      "action": "story.bulk_import",
+      "detail": "AI 助手 16 stories(13 done + 3 backlog)"
+    },
+    {
+      "at": "2026-06-29T01:19:29.842Z",
+      "actor": "agent",
+      "action": "epic.created",
+      "detail": "E-ai-assistant AI 助手 MVP(13 done + 3 backlog)"
+    },
     {
       "at": "2026-06-27T12:38:11.707Z",
       "actor": "agent",
@@ -504,7 +965,7 @@
   ],
   "retrospective": [],
   "metadata": {
-    "updatedAt": "2026-06-27T12:38:11.707Z",
+    "updatedAt": "2026-06-29T01:19:29.842Z",
     "createdBy": "agent"
   }
 }
